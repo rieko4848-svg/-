@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="一人社長">
+<meta name="theme-color" content="#1F4B3F">
+<title>一人社長アシスタント</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root {
+  --font-sans: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+  --text-primary: #232323;
+  --text-secondary: #6b6b66;
+  --border: #ddd9cf;
+  --surface-2: #FAF8F3;
+  --surface-0: #F1EFE7;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-primary: #EDEBE4;
+    --text-secondary: #a6a49c;
+    --border: #3a3a36;
+    --surface-2: #201F1B;
+    --surface-0: #171613;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; background: var(--surface-0); }
+body { font-family: var(--font-sans); }
+.osa-wrap { max-width: 480px; margin: 0 auto; padding: 20px 16px 60px; min-height: 100vh; }
+
+@import url('https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap');
+
+.osa-app { font-family: 'Noto Sans JP', var(--font-sans); color: var(--text-primary); }
+.osa-app * { box-sizing: border-box; }
+.osa-serif { font-family: 'Zen Old Mincho', serif; }
+.osa-mono { font-family: 'JetBrains Mono', monospace; }
+
+.osa-header { display:flex; align-items:baseline; justify-content:space-between; padding: 4px 2px 20px; border-bottom: 1px solid var(--osa-line); margin-bottom: 20px; }
+.osa-date { font-size: 13px; color: var(--osa-sub); }
+
+.osa-tabs { display:flex; gap: 4px; margin-bottom: 24px; }
+.osa-tab { flex:1; text-align:center; padding: 10px 8px; font-size: 13px; cursor:pointer; border: 1px solid var(--osa-line); background: var(--osa-paper); color: var(--osa-sub); border-radius: 2px; transition: all .15s; }
+.osa-tab.active { background: var(--osa-ink); color: var(--osa-paper); border-color: var(--osa-ink); }
+
+.osa-card { border: 1px solid var(--osa-line); border-radius: 2px; padding: 16px 18px; margin-bottom: 12px; background: var(--osa-paper); position: relative; }
+.osa-card-warn { border-color: var(--osa-warn); background: var(--osa-warn-bg); }
+.osa-label { font-size: 11px; letter-spacing: 0.05em; color: var(--osa-sub); margin: 0 0 6px; }
+.osa-label-warn { color: var(--osa-warn-text); }
+.osa-title { font-size: 15px; margin: 0 0 10px; font-weight: 500; }
+.osa-reason { font-size: 12px; color: var(--osa-sub); margin: 0 0 12px; }
+
+.osa-row { display:flex; gap: 8px; }
+.osa-btn { flex:1; padding: 10px; font-size: 13px; border: 1px solid var(--osa-line); background: var(--osa-paper); border-radius: 2px; cursor: pointer; color: var(--text-primary); }
+.osa-btn:hover { border-color: var(--osa-ink); }
+.osa-btn-primary { background: var(--osa-ink); color: var(--osa-paper); border-color: var(--osa-ink); }
+.osa-btn-primary:hover { opacity: 0.85; }
+
+.osa-empty { text-align:center; padding: 40px 20px; color: var(--osa-sub); font-size: 13px; }
+
+.osa-field { margin-bottom: 14px; }
+.osa-field-label { display:block; font-size: 12px; color: var(--osa-sub); margin-bottom: 5px; }
+.osa-input, .osa-select { width: 100%; padding: 10px; border: 1px solid var(--osa-line); border-radius: 2px; font-size: 16px; background: var(--osa-paper); color: var(--text-primary); font-family: inherit; }
+.osa-textarea { width: 100%; padding: 10px; border: 1px solid var(--osa-line); border-radius: 2px; font-size: 16px; min-height: 70px; font-family: inherit; background: var(--osa-paper); color: var(--text-primary); resize: vertical; }
+
+.osa-invoice-item { display:flex; justify-content: space-between; align-items:center; padding: 12px 0; border-bottom: 1px solid var(--osa-line); }
+.osa-invoice-item:last-child { border-bottom: none; }
+.osa-amount { font-size: 15px; }
+.osa-status { font-size: 11px; padding: 3px 8px; border-radius: 2px; }
+.osa-status-paid { background: var(--osa-ok-bg); color: var(--osa-ok-text); }
+.osa-status-unpaid { background: var(--osa-warn-bg); color: var(--osa-warn-text); }
+
+.osa-section-title { font-size: 13px; color: var(--osa-sub); margin: 24px 0 10px; letter-spacing: 0.03em; }
+.osa-section-title:first-child { margin-top: 0; }
+
+.osa-client-item { display:flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--osa-line); font-size: 14px; }
+.osa-client-item:last-child { border-bottom: none; }
+
+.osa-footer-note { text-align:center; font-size: 11px; color: var(--osa-sub); margin-top: 30px; }
+
+.osa-modal-bg { min-height: 100vh; background: var(--surface-0); display:flex; align-items:center; justify-content:center; padding: 20px; }
+.osa-modal { max-width: 380px; width:100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
+.osa-sync-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; background:#9c9a92; }
+.osa-sync-dot.ok { background:#5DCAA5; }
+.osa-sync-dot.err { background:#E24B4A; }
+</style>
+</head>
+<body>
+
+<div id="osa-gate" class="osa-modal-bg">
+  <div class="osa-modal osa-app" style="--osa-paper:var(--surface-2); --osa-ink:#1F4B3F; --osa-line:var(--border); --osa-sub:var(--text-secondary);">
+    <p class="osa-serif" style="font-size:18px;margin:0 0 6px;">一人社長アシスタント</p>
+    <p style="font-size:13px;color:var(--osa-sub);margin:0 0 18px;line-height:1.6;">合言葉を入力してください。初めて使う場合は、好きな合言葉を決めて入力すれば、そのまま使い始められます。2台目以降は、1台目で決めた合言葉と同じものを入力してください。</p>
+    <input class="osa-input" id="osa-gate-code" placeholder="合言葉(4文字以上)" style="margin-bottom:10px;">
+    <button class="osa-btn osa-btn-primary" style="width:100%;" id="osa-gate-submit">はじめる</button>
+    <p id="osa-gate-msg" style="font-size:12px;color:#A32D2D;margin:10px 0 0;min-height:16px;"></p>
+  </div>
+</div>
+
+<div class="osa-wrap" id="osa-main" style="display:none">
+<div class="osa-app" style="--osa-paper:var(--surface-2); --osa-ink:#1F4B3F; --osa-line:var(--border); --osa-sub:var(--text-secondary); --osa-warn-bg:#FAEEDA; --osa-warn-text:#633806; --osa-warn:#EF9F27; --osa-ok-bg:#EAF3DE; --osa-ok-text:#27500A; --osa-tint:#E1F5EE;">
+
+<div class="osa-header">
+  <span class="osa-serif" style="font-size:20px;">一人社長アシスタント</span>
+  <span class="osa-date" id="osa-today"></span>
+</div>
+
+<div class="osa-tabs">
+  <div class="osa-tab active" data-tab="home">ホーム</div>
+  <div class="osa-tab" data-tab="invoice">見積り・請求書</div>
+  <div class="osa-tab" data-tab="clients">取引先</div>
+</div>
+
+<div id="osa-panel-home"></div>
+<div id="osa-panel-invoice" style="display:none"></div>
+<div id="osa-panel-clients" style="display:none"></div>
+
+<p class="osa-footer-note"><span class="osa-sync-dot" id="osa-sync-dot"></span><span id="osa-sync-text">同期を確認しています…</span></p>
+
+</div>
+</div>
+
+<script>
+(function(){
+
+const S = { clients: [], invoices: [], tasks: [], ready: false };
+let ACCESS_CODE = null;
+
+// ---- 保存(サーバー側 / スマホとPCで共有) ----
+function setSyncStatus(state){
+  const dot = document.getElementById('osa-sync-dot');
+  const text = document.getElementById('osa-sync-text');
+  if (!dot) return;
+  dot.className = 'osa-sync-dot' + (state === 'ok' ? ' ok' : state === 'err' ? ' err' : '');
+  text.textContent = state === 'ok' ? '同期済み' : state === 'err' ? '同期に失敗しました(通信環境をご確認ください)' : '同期を確認しています…';
+}
+
+async function pushState(){
+  try {
+    await fetch('/.netlify/functions/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: ACCESS_CODE, action: 'save', state: { clients: S.clients, invoices: S.invoices, tasks: S.tasks } })
+    });
+    localStorage.setItem('osa-backup', JSON.stringify({ clients: S.clients, invoices: S.invoices, tasks: S.tasks }));
+    setSyncStatus('ok');
+  } catch(e){ setSyncStatus('err'); }
+}
+function saveClients(){ return pushState(); }
+function saveInvoices(){ return pushState(); }
+function saveTasks(){ return pushState(); }
+
+async function pullState(){
+  try {
+    const res = await fetch('/.netlify/functions/data?code=' + encodeURIComponent(ACCESS_CODE));
+    if (!res.ok) throw new Error('sync failed');
+    const data = await res.json();
+    S.clients = data.clients || [];
+    S.invoices = data.invoices || [];
+    S.tasks = data.tasks || [];
+    localStorage.setItem('osa-backup', JSON.stringify(data));
+    setSyncStatus('ok');
+    return true;
+  } catch(e){
+    setSyncStatus('err');
+    try {
+      const backup = JSON.parse(localStorage.getItem('osa-backup') || 'null');
+      if (backup){ S.clients = backup.clients||[]; S.invoices = backup.invoices||[]; S.tasks = backup.tasks||[]; }
+    } catch(e2){}
+    return false;
+  }
+}
+
+function loadAll(){
+  S.ready = true;
+  return pullState();
+}
+
+// ---- 合言葉ゲート ----
+async function tryEnter(code){
+  const msg = document.getElementById('osa-gate-msg');
+  msg.textContent = '';
+  if (!code || code.length < 4){ msg.textContent = '4文字以上で入力してください'; return; }
+  try {
+    const initRes = await fetch('/.netlify/functions/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, action: 'init' })
+    });
+    if (initRes.status === 401){ msg.textContent = '合言葉が違います'; return; }
+    if (!initRes.ok){ msg.textContent = '通信に失敗しました。もう一度お試しください'; return; }
+    const data = await initRes.json();
+    ACCESS_CODE = code;
+    localStorage.setItem('osa-access-code', code);
+    S.clients = data.clients || [];
+    S.invoices = data.invoices || [];
+    S.tasks = data.tasks || [];
+    S.ready = true;
+    document.getElementById('osa-gate').style.display = 'none';
+    document.getElementById('osa-main').style.display = 'block';
+    setSyncStatus('ok');
+    renderHome(); renderInvoice(); renderClients();
+    startAutoRefresh();
+  } catch(e){
+    msg.textContent = '通信に失敗しました。もう一度お試しください';
+  }
+}
+
+function startAutoRefresh(){
+  setInterval(async () => {
+    await pullState();
+    const activeTab = document.querySelector('.osa-tab.active').dataset.tab;
+    if (activeTab === 'home') renderHome();
+    if (activeTab === 'invoice') renderInvoice();
+    if (activeTab === 'clients') renderClients();
+  }, 20000);
+}
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function addDays(dateStr, n){ const d = new Date(dateStr); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function daysBetween(a,b){ return Math.round((new Date(b) - new Date(a)) / 86400000); }
+function fmtDate(d){ const dt = new Date(d); return (dt.getMonth()+1)+'/'+dt.getDate(); }
+function fmtMoney(n){ return '¥' + Number(n).toLocaleString('ja-JP'); }
+
+// ---- タスク生成ルール ----
+function addTask({type, title, dueDate, sourceType, sourceId}){
+  S.tasks.push({
+    id: uid(), type, title, dueDate,
+    sourceType: sourceType||null, sourceId: sourceId||null,
+    postponedCount: 0, done: false, createdAt: todayStr()
+  });
+  saveTasks();
+}
+
+function onInvoiceIssued(invoice){
+  addTask({
+    type: '未入金確認',
+    title: invoice.clientName + ' 「' + invoice.item + '」の入金確認',
+    dueDate: addDays(invoice.issueDate, 10),
+    sourceType: 'invoice', sourceId: invoice.id
+  });
+}
+
+// ---- 今日やること 並べ替え ----
+function sortedOpenTasks(){
+  const open = S.tasks.filter(t => !t.done);
+  return open.sort((a,b) => {
+    const da = a.dueDate || '9999-99-99';
+    const db = b.dueDate || '9999-99-99';
+    if (da !== db) return da < db ? -1 : 1;
+    return (b.postponedCount||0) - (a.postponedCount||0);
+  });
+}
+
+function isCritical(t){
+  if (t.type !== '未入金確認') return false;
+  const invoice = S.invoices.find(i => i.id === t.sourceId);
+  if (!invoice || invoice.isPaid) return false;
+  const overdueDays = daysBetween(t.dueDate, todayStr());
+  return (overdueDays > 0 && invoice.amount >= 100000) || overdueDays > 7;
+}
+
+function reasonFor(t){
+  const today = todayStr();
+  if (!t.dueDate) return 'いつでも大丈夫なタスクです';
+  const diff = daysBetween(today, t.dueDate);
+  if (t.postponedCount >= 3) return (t.postponedCount) + '回先送りにしています。5分だけやってみませんか?';
+  if (diff < 0) return '期限を' + Math.abs(diff) + '日過ぎています';
+  if (diff === 0) return '期限は今日です';
+  if (diff === 1) return '期限は明日です';
+  return '期限まであと' + diff + '日です';
+}
+
+// ---- レンダリング: ホーム ----
+function renderHome(){
+  const panel = document.getElementById('osa-panel-home');
+  if (!S.ready){ panel.innerHTML = '<div class="osa-empty">読み込み中…</div>'; return; }
+
+  const open = sortedOpenTasks();
+  const critical = open.filter(isCritical);
+  const normal = open.filter(t => !isCritical(t));
+  const top = normal.slice(0,3);
+  const rest = normal.length - top.length;
+
+  let html = '';
+
+  if (critical.length){
+    html += '<p class="osa-section-title">見逃し厳禁</p>';
+    critical.forEach(t => {
+      const inv = S.invoices.find(i => i.id === t.sourceId);
+      html += cardHTML(t, true, inv);
+    });
+  }
+
+  html += '<p class="osa-section-title">今日やること</p>';
+  if (!top.length){
+    html += '<div class="osa-empty">今のところ、やることはありません</div>';
+  } else {
+    top.forEach(t => { html += cardHTML(t, false); });
+    if (rest > 0){
+      html += '<p style="font-size:12px;color:var(--osa-sub);text-align:center;cursor:pointer;" id="osa-show-rest">+ ほか' + rest + '件を見る</p>';
+    }
+  }
+
+  html += '<p class="osa-section-title">話して記録する</p>';
+  html += '<div class="osa-card">';
+  html += '<textarea class="osa-textarea" id="osa-voice-input" placeholder="例:A社に来週までに見積り送る / 田中様、新しい取引先です"></textarea>';
+  html += '<div style="display:flex;justify-content:flex-end;margin-top:8px;gap:8px;align-items:center;">';
+  html += '<span id="osa-voice-status" style="font-size:12px;color:var(--osa-sub);"></span>';
+  html += '<button class="osa-btn osa-btn-primary" style="flex:none;padding:8px 16px;" id="osa-voice-submit">記録する</button>';
+  html += '</div></div>';
+
+  panel.innerHTML = html;
+
+  const showRestBtn = document.getElementById('osa-show-rest');
+  if (showRestBtn) showRestBtn.onclick = () => renderHomeAll();
+
+  document.querySelectorAll('.osa-task-done').forEach(btn => {
+    btn.onclick = () => { const t = S.tasks.find(x => x.id === btn.dataset.id); if (t){ t.done = true; saveTasks(); renderHome(); } };
+  });
+  document.querySelectorAll('.osa-task-postpone').forEach(btn => {
+    btn.onclick = () => { const t = S.tasks.find(x => x.id === btn.dataset.id); if (t){ t.postponedCount=(t.postponedCount||0)+1; t.dueDate=addDays(todayStr(),1); saveTasks(); renderHome(); } };
+  });
+
+  document.getElementById('osa-voice-submit').onclick = handleVoiceSubmit;
+}
+
+function renderHomeAll(){
+  const panel = document.getElementById('osa-panel-home');
+  const open = sortedOpenTasks();
+  const critical = open.filter(isCritical);
+  const normal = open.filter(t => !isCritical(t));
+
+  let html = '';
+  if (critical.length){
+    html += '<p class="osa-section-title">見逃し厳禁</p>';
+    critical.forEach(t => { const inv = S.invoices.find(i => i.id === t.sourceId); html += cardHTML(t, true, inv); });
+  }
+  html += '<p class="osa-section-title">今日やること(すべて)</p>';
+  if (!normal.length){ html += '<div class="osa-empty">今のところ、やることはありません</div>'; }
+  else { normal.forEach(t => { html += cardHTML(t, false); }); }
+
+  panel.innerHTML = html;
+  document.querySelectorAll('.osa-task-done').forEach(btn => {
+    btn.onclick = () => { const t = S.tasks.find(x => x.id === btn.dataset.id); if (t){ t.done = true; saveTasks(); renderHome(); } };
+  });
+  document.querySelectorAll('.osa-task-postpone').forEach(btn => {
+    btn.onclick = () => { const t = S.tasks.find(x => x.id === btn.dataset.id); if (t){ t.postponedCount=(t.postponedCount||0)+1; t.dueDate=addDays(todayStr(),1); saveTasks(); renderHome(); } };
+  });
+}
+
+function cardHTML(t, warn, invoice){
+  const label = warn ? '<p class="osa-label osa-label-warn">見逃し厳禁</p>' : '';
+  let reason = reasonFor(t);
+  if (warn && invoice) reason = '未入金:' + fmtMoney(invoice.amount) + '(' + reason + ')';
+  return '<div class="osa-card ' + (warn ? 'osa-card-warn' : '') + '">' +
+    label +
+    '<p class="osa-title">' + escapeHTML(t.title) + '</p>' +
+    '<p class="osa-reason">理由:' + escapeHTML(reason) + '</p>' +
+    '<div class="osa-row">' +
+      '<button class="osa-btn osa-btn-primary osa-task-done" data-id="' + t.id + '">完了にする</button>' +
+      '<button class="osa-btn osa-task-postpone" data-id="' + t.id + '">明日に送る</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function escapeHTML(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ---- 話して記録する: ルールベースの簡易判定 ----
+// (単独サイトではAIを直接呼べないため、キーワードで判定する簡易版)
+function classifyInput(text){
+  const clientHints = ['新しい取引先', '新規のお客', '新しいお客', '取引先です', 'お客様です', '様、新規'];
+  const isClient = clientHints.some(k => text.includes(k));
+
+  let dueDate = null;
+  const today = todayStr();
+  if (text.includes('今日')) dueDate = today;
+  else if (text.includes('明日')) dueDate = addDays(today, 1);
+  else if (text.includes('明後日')) dueDate = addDays(today, 2);
+  else if (text.includes('来週')) dueDate = addDays(today, 7);
+  else {
+    const m = text.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*日/);
+    if (m){
+      const year = new Date().getFullYear();
+      const mm = String(m[1]).padStart(2,'0');
+      const dd = String(m[2]).padStart(2,'0');
+      dueDate = year + '-' + mm + '-' + dd;
+    }
+  }
+
+  if (isClient){
+    const name = text.replace(/新しい取引先です|新規のお客です|新しいお客です|取引先です|お客様です|、|。/g,'').trim();
+    return { type: 'client', title: name || text.slice(0,20), dueDate: null, note: '' };
+  }
+  return { type: 'task', title: text.slice(0,40), dueDate };
+}
+
+function handleVoiceSubmit(){
+  const input = document.getElementById('osa-voice-input');
+  const status = document.getElementById('osa-voice-status');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const result = classifyInput(text);
+
+  if (result.type === 'client'){
+    S.clients.push({ id: uid(), name: result.title, note: result.note || '' });
+    saveClients();
+    status.textContent = '取引先として記録しました';
+  } else {
+    addTask({ type: 'メモ', title: result.title, dueDate: result.dueDate || null });
+    status.textContent = 'タスクとして記録しました';
+  }
+  input.value = '';
+  setTimeout(() => { renderHome(); }, 500);
+}
+
+// ---- レンダリング: 見積り・請求書 ----
+function renderInvoice(){
+  const panel = document.getElementById('osa-panel-invoice');
+  if (!S.ready){ panel.innerHTML = '<div class="osa-empty">読み込み中…</div>'; return; }
+
+  const clientOptions = S.clients.map(c => '<option value="' + c.id + '">' + escapeHTML(c.name) + '</option>').join('');
+
+  let html = '<div class="osa-card">';
+  html += '<p class="osa-title">新しく発行する</p>';
+  html += '<div class="osa-field"><label class="osa-field-label">取引先</label>';
+  html += '<select class="osa-select" id="osa-inv-client"><option value="">選択してください</option>' + clientOptions + '<option value="__new__">+ 新しい取引先</option></select></div>';
+  html += '<div class="osa-field" id="osa-inv-newclient-wrap" style="display:none"><label class="osa-field-label">新しい取引先名</label><input class="osa-input" id="osa-inv-newclient" placeholder="例:株式会社サンプル"></div>';
+  html += '<div class="osa-field"><label class="osa-field-label">品目</label><input class="osa-input" id="osa-inv-item" placeholder="例:ロゴ制作一式"></div>';
+  html += '<div class="osa-field"><label class="osa-field-label">金額</label><input class="osa-input" type="number" id="osa-inv-amount" placeholder="例:80000"></div>';
+  html += '<div class="osa-field"><label class="osa-field-label">請求の種類</label>';
+  html += '<select class="osa-select" id="osa-inv-pattern"><option value="single">単発</option><option value="split">分割(着手金・中間金など)</option></select></div>';
+  html += '<button class="osa-btn osa-btn-primary" style="width:100%" id="osa-inv-submit">発行する</button>';
+  html += '</div>';
+
+  html += '<p class="osa-section-title">これまでの請求書</p>';
+  if (!S.invoices.length){
+    html += '<div class="osa-empty">まだ請求書がありません</div>';
+  } else {
+    html += '<div class="osa-card" style="padding:4px 18px;">';
+    S.invoices.slice().reverse().forEach(inv => {
+      html += '<div class="osa-invoice-item">';
+      html += '<div><div style="font-size:14px;">' + escapeHTML(inv.clientName) + '</div>';
+      html += '<div style="font-size:12px;color:var(--osa-sub);">' + escapeHTML(inv.item) + ' ・ ' + fmtDate(inv.issueDate) + '発行</div></div>';
+      html += '<div style="text-align:right;">';
+      html += '<div class="osa-amount osa-mono">' + fmtMoney(inv.amount) + '</div>';
+      html += '<span class="osa-status ' + (inv.isPaid ? 'osa-status-paid' : 'osa-status-unpaid') + '" data-id="' + inv.id + '" style="cursor:pointer;">' + (inv.isPaid ? '入金済み' : '未入金(タップで確定)') + '</span>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  panel.innerHTML = html;
+
+  const clientSel = document.getElementById('osa-inv-client');
+  clientSel.onchange = () => {
+    document.getElementById('osa-inv-newclient-wrap').style.display = clientSel.value === '__new__' ? 'block' : 'none';
+  };
+
+  document.getElementById('osa-inv-submit').onclick = () => {
+    let clientId = clientSel.value;
+    let clientName = '';
+    if (clientId === '__new__'){
+      clientName = document.getElementById('osa-inv-newclient').value.trim();
+      if (!clientName){ alert('取引先名を入力してください'); return; }
+      const newClient = { id: uid(), name: clientName };
+      S.clients.push(newClient);
+      saveClients();
+      clientId = newClient.id;
+    } else if (clientId) {
+      const c = S.clients.find(c => c.id === clientId);
+      clientName = c ? c.name : '';
+    } else {
+      alert('取引先を選択してください');
+      return;
+    }
+
+    const item = document.getElementById('osa-inv-item').value.trim();
+    const amount = Number(document.getElementById('osa-inv-amount').value);
+    const pattern = document.getElementById('osa-inv-pattern').value;
+    if (!item || !amount){ alert('品目と金額を入力してください'); return; }
+
+    const invoice = {
+      id: uid(), clientId, clientName, item, amount,
+      billingPattern: pattern, issueDate: todayStr(), isPaid: false
+    };
+    S.invoices.push(invoice);
+    saveInvoices();
+    onInvoiceIssued(invoice);
+    renderInvoice();
+  };
+
+  document.querySelectorAll('.osa-status-unpaid').forEach(el => {
+    el.onclick = () => {
+      const inv = S.invoices.find(i => i.id === el.dataset.id);
+      if (inv){ inv.isPaid = true; saveInvoices(); renderInvoice(); }
+    };
+  });
+}
+
+// ---- レンダリング: 取引先 ----
+function renderClients(){
+  const panel = document.getElementById('osa-panel-clients');
+  if (!S.ready){ panel.innerHTML = '<div class="osa-empty">読み込み中…</div>'; return; }
+
+  let html = '<div class="osa-card">';
+  html += '<div class="osa-field"><input class="osa-input" id="osa-newclient-name" placeholder="新しい取引先名"></div>';
+  html += '<button class="osa-btn osa-btn-primary" style="width:100%" id="osa-newclient-add">追加する</button>';
+  html += '</div>';
+
+  if (!S.clients.length){
+    html += '<div class="osa-empty">まだ取引先が登録されていません</div>';
+  } else {
+    html += '<div class="osa-card">';
+    S.clients.forEach(c => {
+      html += '<div class="osa-client-item"><span>' + escapeHTML(c.name) + '</span>' +
+        (c.note ? '<span style="color:var(--osa-sub);font-size:12px;">' + escapeHTML(c.note) + '</span>' : '') +
+        '</div>';
+    });
+    html += '</div>';
+  }
+
+  panel.innerHTML = html;
+  document.getElementById('osa-newclient-add').onclick = () => {
+    const input = document.getElementById('osa-newclient-name');
+    const name = input.value.trim();
+    if (!name) return;
+    S.clients.push({ id: uid(), name });
+    saveClients();
+    renderClients();
+  };
+}
+
+// ---- タブ切り替え ----
+document.querySelectorAll('.osa-tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.osa-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    ['home','invoice','clients'].forEach(name => {
+      document.getElementById('osa-panel-' + name).style.display = name === tab.dataset.tab ? 'block' : 'none';
+    });
+  };
+});
+
+document.getElementById('osa-today').textContent = new Date().toLocaleDateString('ja-JP', { month:'long', day:'numeric', weekday:'short' });
+
+document.getElementById('osa-gate-submit').onclick = () => {
+  tryEnter(document.getElementById('osa-gate-code').value.trim());
+};
+document.getElementById('osa-gate-code').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') tryEnter(document.getElementById('osa-gate-code').value.trim());
+});
+
+const savedCode = localStorage.getItem('osa-access-code');
+if (savedCode){
+  document.getElementById('osa-gate-code').value = savedCode;
+  tryEnter(savedCode);
+}
+
+})();
+</script>
+</body>
+</html>
