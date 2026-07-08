@@ -7,8 +7,16 @@ function resp(statusCode, obj){
 }
 const emptyState = { clients: [], invoices: [], tasks: [] };
 
+function getBlobStore(){
+  return getStore({
+    name: 'osa-store',
+    siteID: process.env.OSA_SITE_ID,
+    token: process.env.OSA_BLOBS_TOKEN
+  });
+}
+
 exports.handler = async (event) => {
-  const store = getStore('osa-store');
+  const store = getBlobStore();
 
   if (event.httpMethod === 'GET') {
     const code = event.queryStringParameters && event.queryStringParameters.code;
