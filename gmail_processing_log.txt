@@ -1,0 +1,18 @@
+=== Gmail Auto Cleanup Processing Log ===
+
+Log file for Gmail automatic cleanup operations.
+This file records all processing activities, errors, and statistics.
+
+Format: [TIMESTAMP] - [LEVEL] - [MESSAGE]
+
+Levels:
+- INFO: Informational messages about processing progress
+- WARNING: Warning messages that don't stop processing
+- ERROR: Error messages for failed operations
+- DEBUG: Debug information for troubleshooting
+
+---
+
+Ready for processing. Awaiting execution...
+
+---
