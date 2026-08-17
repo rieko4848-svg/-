@@ -112,11 +112,13 @@ body { font-family: var(--font-sans); }
   <div class="osa-tab active" data-tab="home">ホーム</div>
   <div class="osa-tab" data-tab="invoice">見積り・請求書</div>
   <div class="osa-tab" data-tab="clients">取引先</div>
+  <div class="osa-tab" data-tab="insights">Instagram</div>
 </div>
 
 <div id="osa-panel-home"></div>
 <div id="osa-panel-invoice" style="display:none"></div>
 <div id="osa-panel-clients" style="display:none"></div>
+<div id="osa-panel-insights" style="display:none"></div>
 
 <p class="osa-footer-note"><span class="osa-sync-dot" id="osa-sync-dot"></span><span id="osa-sync-text">同期を確認しています…</span></p>
 
@@ -202,7 +204,7 @@ async function tryEnter(code){
     document.getElementById('osa-gate').style.display = 'none';
     document.getElementById('osa-main').style.display = 'block';
     setSyncStatus('ok');
-    renderHome(); renderInvoice(); renderClients();
+    renderHome(); renderInvoice(); renderClients(); renderInsights();
     startAutoRefresh();
   } catch(e){
     msg.textContent = '通信に失敗しました。もう一度お試しください';
@@ -216,6 +218,7 @@ function startAutoRefresh(){
     if (activeTab === 'home') renderHome();
     if (activeTab === 'invoice') renderInvoice();
     if (activeTab === 'clients') renderClients();
+    if (activeTab === 'insights') renderInsights();
   }, 20000);
 }
 
@@ -536,12 +539,75 @@ function renderClients(){
   };
 }
 
+// ---- レンダリング: Instagramインサイト ----
+async function renderInsights(){
+  const panel = document.getElementById('osa-panel-insights');
+  if (!S.ready){ panel.innerHTML = '<div class="osa-empty">読み込み中…</div>'; return; }
+  panel.innerHTML = '<div class="osa-empty">読み込み中…</div>';
+  try {
+    const res = await fetch('/.netlify/functions/instagram?code=' + encodeURIComponent(ACCESS_CODE));
+    const data = await res.json();
+    renderInsightsData(data);
+  } catch (e) {
+    panel.innerHTML = '<div class="osa-empty">Instagramの情報を取得できませんでした</div>';
+  }
+}
+
+function insightStat(label, value){
+  return '<div style="flex:1;">' +
+    '<div class="osa-mono" style="font-size:20px;">' + (value === null || value === undefined ? '—' : Number(value).toLocaleString('ja-JP')) + '</div>' +
+    '<div style="font-size:11px;color:var(--osa-sub);margin-top:4px;">' + label + '</div>' +
+  '</div>';
+}
+
+function renderInsightsData(data){
+  const panel = document.getElementById('osa-panel-insights');
+
+  if (!data || !data.connected){
+    panel.innerHTML =
+      '<div class="osa-card">' +
+      '<p class="osa-title">Instagramと連携されていません</p>' +
+      '<p class="osa-reason">サイトの環境変数に IG_ACCESS_TOKEN と IG_BUSINESS_ID を設定すると、フォロワー数やリーチなどのインサイトがここに表示されます。</p>' +
+      '</div>';
+    return;
+  }
+
+  let html = '<div class="osa-card">';
+  html += '<p class="osa-label">' + (data.username ? '@' + escapeHTML(data.username) : 'Instagram') + '</p>';
+  html += '<div class="osa-row" style="text-align:center;">';
+  html += insightStat('フォロワー', data.followersCount);
+  html += insightStat('投稿数', data.mediaCount);
+  html += '</div></div>';
+
+  html += '<div class="osa-card">';
+  html += '<p class="osa-label">直近のインサイト(過去1日)</p>';
+  html += '<div class="osa-row" style="text-align:center;">';
+  html += insightStat('リーチ', data.reach);
+  html += insightStat('プロフィールアクセス', data.profileViews);
+  html += '</div></div>';
+
+  html += '<p class="osa-footer-note">' + (data.fetchedAt ? fmtDate(data.fetchedAt) + ' 更新 ・ ' : '') +
+    '<span style="text-decoration:underline;cursor:pointer;" id="osa-insights-refresh">今すぐ更新</span></p>';
+
+  panel.innerHTML = html;
+  document.getElementById('osa-insights-refresh').onclick = async () => {
+    panel.innerHTML = '<div class="osa-empty">更新しています…</div>';
+    try {
+      const res = await fetch('/.netlify/functions/instagram?code=' + encodeURIComponent(ACCESS_CODE) + '&refresh=1');
+      const fresh = await res.json();
+      renderInsightsData(fresh);
+    } catch (e) {
+      panel.innerHTML = '<div class="osa-empty">更新に失敗しました</div>';
+    }
+  };
+}
+
 // ---- タブ切り替え ----
 document.querySelectorAll('.osa-tab').forEach(tab => {
   tab.onclick = () => {
     document.querySelectorAll('.osa-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
-    ['home','invoice','clients'].forEach(name => {
+    ['home','invoice','clients','insights'].forEach(name => {
       document.getElementById('osa-panel-' + name).style.display = name === tab.dataset.tab ? 'block' : 'none';
     });
   };
