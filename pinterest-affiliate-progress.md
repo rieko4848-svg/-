@@ -64,6 +64,57 @@
 
 ---
 
+### Week 2: 8月24日〜8月30日
+
+**期間：** 8月24日（Saturday投稿）〜 8月30日  
+**目標：** 4ニッチ × 1ピンずつ投稿、コンバージョン率改善テスト開始
+
+#### Pinterest Analytics（投稿直後）
+```
+- インプレッション：集計中
+- エンゲージメント：集計中
+- アウトバウンドクリック：集計中
+- 新規ピン：4本（matcha、indoor zen、outdoor water、minimalist org）
+```
+
+#### Amazon Associates（投稿直後）
+```
+- クリック数：集計中
+- 売上：集計中（確定期間内）
+```
+
+#### 実施内容
+- ✅ **Week 2ピン4本投稿完了（8月24日土曜）**
+  1. **Matcha Tea** - Matcha Tea Set LP導線
+     - Canvaデザイン：日本茶道セットアップ
+     - 代替テキスト：matcha powder、ceramic bowl、bamboo whisk
+  2. **Indoor Zen Garden** - Indoor Japanese Zen Garden LP導線
+     - Canvaデザイン：デスク禅庭4パネル（before/after含む）
+     - 代替テキスト：office zen garden、meditation space
+  3. **Outdoor Water Garden** - Outdoor Japanese Water Garden LP導線
+     - Canvaデザイン：バンブーファウンテン庭園 + 3サイズ製品紹介
+     - 代替テキスト：bamboo fountain、outdoor garden、water feature
+  4. **Minimalist Home Organization** - Japanese Minimalist Home Organization LP導線
+     - Canvaデザイン：整理整頓before/after（クローゼット）
+     - 代替テキスト：bamboo organizer、declutter、home storage
+- ✅ 全4ピンに代替テキスト（Alt Text）追加
+- ✅ Pinterest説明文作成・最適化（800字以内）
+- ✅ 各LPへの導線確認
+
+#### 気づき・改善点
+- **早期投稿戦略**：予定の金曜20時ではなく、土曜朝に投稿（アルゴリズム確認のため）
+- **4ニッチ並行テスト**：matcha、zen garden（室内）、water garden（屋外）、organizationから各1本で、どのニッチがコンバージョン率が高いか検証開始
+- **次フェーズ**：コンバージョン0%→改善のため、LP内のCTA強化とビジュアル改善を並行実施
+
+#### 来週の予定
+- **毎日：Pinterest Analytics 軽監視**（クリック数、インプレッション数の初期反応確認）
+- **8月29日（金曜）**：Week 1-2の詳細データ収集（スクリーンショット）
+- **8月30日（土曜）**：LP改善テスト開始（CTA追加、商品説明拡充、ビジュアル最適化）
+- **Week 3ピン準備**：高反応ニッチへの集中投資（Week 1-2データで判明した最高パフォーマンスニッチ）
+- **目標**：初回コンバージョン達成または、コンバージョン率0.1%以上への改善確認
+
+---
+
 ## 📝 テンプレート（次週以降の報告用）
 
 ### Week X: M月D日〜M月D日
