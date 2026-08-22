@@ -8,20 +8,25 @@
 
 ## 📊 週単位の進捗記録
 
-### Week 1: 8月14日〜8月20日
+### Week 1: 8月14日〜8月21日
 
-**期間：** 8月14日（Day 1投稿）〜 8月20日  
-**目標：** ピン①②③④⑤投稿完了、LP最適化完了
+**期間：** 8月14日（Day 1投稿）〜 8月21日  
+**目標：** ピン①②③④⑤投稿完了、LP最適化完了、アフィリエイトリンク検証
 
-#### Pinterest Analytics（8月14-15日時点）
-- インプレッション：11.0K
-- エンゲージメント：256
-- アウトバウンドクリック：9
-- トップピン：Bamboo Fountain Garden（2,411インプレッション）
+#### Pinterest Analytics（8月21日最終確認）
+- インプレッション：15.6K（+42% vs 11.0K）
+- エンゲージメント：記録継続中
+- アウトバウンドクリック（Pinterest追跡）：11
+- クリック経由（amzn.to等LP経由）：33
+- **合計クリック数：44**
+- トップピン：Bamboo Fountain Garden Feature（3,633インプレッション、0.1%CTR）
 
-#### Amazon Associates
-- 売上：0件（準備段階）
-- リンク設定：3つのLP × 10製品完了
+#### Amazon Associates（8月21日確認）
+- クリック数：44
+- 売上：0件
+- 確定報酬：$1.25（クリック以外のソース）
+- コンバージョン率：0.00%
+- **アカウント状態：✅ Unblocked、税情報完全検証済み**
 
 #### 実施内容
 - ✅ Notion LP最適化・再構成（4つのLP完成）
@@ -30,28 +35,32 @@
   3. Japanese Minimalist Home Organization LP
   4. Outdoor Japanese Water Garden LP（新規作成）
 - ✅ Amazon 屋外バンブーファウンテン3製品アフィリエイト設定
-  - 12" Rocking Bamboo Fountain (4.4★ 1,251件) $43.99
-  - Zen Garden Water Fountain Kit (4.4★ 724件) $49.99
-  - Novabright 36" Tall (4.4★ 124件) $118.99
+  - 12" Rocking Bamboo Fountain (4.4★ 1,251件) $43.99 → https://amzn.to/4wnOhNP
+  - Zen Garden Water Fountain Kit (4.4★ 724件) $49.99 → https://amzn.to/3TZfVmV
+  - Novabright 36" Tall (4.4★ 124件) $118.99 → https://amzn.to/4g0XAOT
 - ✅ ピン①②③④⑤投稿完了（8月15日20時投稿）
 - ✅ 新規ピン①②③投稿完了（Outdoor Water Garden LP導線）
-  - Japanese Bamboo Water Fountain for Outdoor Garden
-  - Create a Zen Water Garden: Complete Outdoor Kit
-  - Premium Bamboo Fountain for Backyard Meditation
+  - Japanese Bamboo Water Fountain for Outdoor Garden（47インプレッション）
+  - Create a Zen Water Garden: Complete Outdoor Kit（47インプレッション）
+  - Premium Bamboo Fountain for Backyard Meditation（47インプレッション）
 - ✅ Canva プロンプト作成（3ピン分）
 - ✅ Pinterest 説明文・代替テキスト作成（3ピン分）
 - ✅ 毎週ピン増設スケジュール確立（毎週金曜20時に3ピン追加）
+- ✅ **全9つのアフィリエイトリンク検証完了（amzn.to形式で全て正常）**
 
 #### 気づき・改善点
-- **重要発見：** Bamboo Fountain (2,411インプレッション、2.74%CTR)はビジュアルが優秀だが、LPリンク商品がないとアウトバウンドクリック低い
-- **戦略調整：** 既存ピンはインプレッション保護、新規ピンで新しい Outdoor LP へ導線
-- **LP分割効果：** インドア用と屋外用を分けることで、ユーザー期待値と実装の一致度向上
-- クリック率1%超えを目指す（現在0.08%）
+- **重要発見**：44クリックからの成約が0件 = LPの説得力向上が次のフェーズの課題
+  - Bamboo Fountain Gardenピン（3,633インプレッション）が高パフォーマンスを維持
+  - クリックは発生しているが、LPからAmazon購入への導線改善が必要
+- **リンク検証の結果**：すべてのアフィリエイトリンク正常、アカウント設定完全 → 問題はLP/商品選定にあり
+- **新しいピン効果**：各47インプレッション（初期段階、成長待機中）
+- **戦略調整**：Bamboo Fountainピンの高インプレッションをLPの説得力向上で活かす必要
 
 #### 来週の予定
-- 毎週金曜日20時に3ピン追加投稿開始（Week 2）
-- 毎週末：Pinterest Analytics + Amazon Dashboard 計測
-- 高反応ニッチへの集中投資検討
+- **Week 2ピン投稿**：matcha、indoor zen garden、outdoor gardenから各1本（8月29日金曜20時またはそれ以前）
+- **LP改善**：商品説明の充実、CTAの追加、ビジュアルの改善
+- **毎週末：Pinterest Analytics + Amazon Dashboard 計測**
+- **目標**：コンバージョン率を0.1%以上に改善
 
 ---
 
