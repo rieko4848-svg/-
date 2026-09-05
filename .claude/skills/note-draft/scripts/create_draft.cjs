@@ -26,19 +26,42 @@ const BODY_SELECTORS = [
   'div[contenteditable="true"]:not([data-placeholder*="タイトル"])',
 ];
 
+// A line exactly equal to this marker splits the body into a free preview
+// part and a paid part. Placed by the note-writer skill (or the caller)
+// at the point where the paywall should go.
+const DEFAULT_PAID_MARKER = '<<<有料エリアここから>>>';
+
+// Candidates for note.com's block "+" insert control, tried on the empty
+// line where the paywall divider should be inserted.
+const ADD_BLOCK_SELECTORS = [
+  '[aria-label="コンテンツを追加"]',
+  '[aria-label="要素を追加"]',
+  'button[data-testid="addBlockButton"]',
+];
+
 function parseArgs(argv) {
-  const args = { debug: false };
+  const args = { debug: false, paidMarker: DEFAULT_PAID_MARKER };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--title') args.title = argv[++i];
     else if (a === '--body') args.body = argv[++i];
     else if (a === '--body-file') args.bodyFile = argv[++i];
+    else if (a === '--paid-marker') args.paidMarker = argv[++i];
     else if (a === '--debug') args.debug = true;
     else throw new Error(`unknown argument: ${a}`);
   }
   if (!args.title) throw new Error('--title is required');
   if (!args.body && !args.bodyFile) throw new Error('--body or --body-file is required');
   if (args.bodyFile) args.body = fs.readFileSync(args.bodyFile, 'utf8');
+
+  const markerIndex = args.body.indexOf(args.paidMarker);
+  if (markerIndex === -1) {
+    args.freeBody = args.body;
+    args.paidBody = null;
+  } else {
+    args.freeBody = args.body.slice(0, markerIndex).replace(/\n$/, '');
+    args.paidBody = args.body.slice(markerIndex + args.paidMarker.length).replace(/^\n/, '');
+  }
   return args;
 }
 
@@ -57,6 +80,34 @@ async function findFirst(page, selectors, label) {
       'note.comのUIが変更された可能性があります。--debug を付けて再実行し、' +
       './note-draft-debug/ のスクリーンショットを見てセレクタを更新してください。'
   );
+}
+
+async function typeLines(page, text) {
+  for (const line of text.split('\n')) {
+    await page.keyboard.type(line);
+    await page.keyboard.press('Enter');
+  }
+}
+
+// Tries to insert note.com's actual paywall divider ("ここから先は有料エリア")
+// via its block-insert menu. Returns false (rather than throwing) if the UI
+// isn't where expected, so the caller can fall back to a plain-text marker.
+async function tryInsertPaidDivider(page) {
+  for (const sel of ADD_BLOCK_SELECTORS) {
+    try {
+      const addButton = page.locator(sel).first();
+      await addButton.waitFor({ state: 'visible', timeout: 2000 });
+      await addButton.click();
+
+      const menuItem = page.getByText(/有料/).first();
+      await menuItem.waitFor({ state: 'visible', timeout: 2000 });
+      await menuItem.click();
+      return true;
+    } catch {
+      // try next candidate
+    }
+  }
+  return false;
 }
 
 async function saveDebugArtifacts(page) {
@@ -96,9 +147,18 @@ async function main() {
 
     const bodyField = await findFirst(page, BODY_SELECTORS, '本文');
     await bodyField.click();
-    for (const line of args.body.split('\n')) {
-      await page.keyboard.type(line);
-      await page.keyboard.press('Enter');
+    await typeLines(page, args.freeBody);
+
+    let paidDividerInserted = null; // null = no paid part requested
+    if (args.paidBody !== null) {
+      paidDividerInserted = await tryInsertPaidDivider(page);
+      if (!paidDividerInserted) {
+        // Fallback: leave a clearly-labeled plain-text line so the boundary
+        // is still visible; the user converts it to a real paywall by hand.
+        await page.keyboard.type('----- ここから先は有料エリア(要手動設定) -----');
+        await page.keyboard.press('Enter');
+      }
+      await typeLines(page, args.paidBody);
     }
 
     // note.com autosaves drafts periodically; give it time before reading the URL back.
@@ -109,6 +169,14 @@ async function main() {
     const draftUrl = page.url();
     console.log('下書きを保存しました(公開はしていません):');
     console.log(draftUrl);
+    if (paidDividerInserted === true) {
+      console.log('有料エリアの区切りを自動設定しました(価格設定はnote.com公開画面で行ってください)。');
+    } else if (paidDividerInserted === false) {
+      console.log(
+        '有料エリアの自動設定に失敗したため、本文中にプレーンテキストの目印を入れました。\n' +
+          'note.comの編集画面でその位置に「有料エリア」機能を手動で設定してください。'
+      );
+    }
 
     if (args.debug) await saveDebugArtifacts(page);
   } catch (err) {
