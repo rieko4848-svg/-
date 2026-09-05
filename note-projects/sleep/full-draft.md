@@ -70,7 +70,7 @@
 
 ---
 
-**参考文献**: "Efficacy of lifestyle medicine on sleep quality: A meta-analysis of randomized controlled trials." *Journal of Affective Disorders*, 2023. DOI: [10.1016/j.jad.2023.02.111](https://doi.org/10.1016/j.jad.2023.02.111)
+**参考文献**: Wong A, et al. "Efficacy of lifestyle medicine on sleep quality: A meta-analysis of randomized controlled trials." *Journal of Affective Disorders*, 2023. DOI: [10.1016/j.jad.2023.02.111](https://doi.org/10.1016/j.jad.2023.02.111)
 
 *(本章は、ChatGPTによる独立査読を踏まえ、「非活動的な対照群」と「活動的な対照群」の違い、およびサブグループ解析であることを明記する形に訂正しています。)*
 
@@ -152,7 +152,7 @@
 
 ---
 
-**参考文献**: "Association Between Nap and Reported Cognitive Function and Role of Sleep Debt: A Population-Based Study." *Journal of Clinical Neurology*, 2022;18(4):470-477. DOI: [10.3988/jcn.2022.18.4.470](https://doi.org/10.3988/jcn.2022.18.4.470)
+**参考文献**: Chang JH, et al. "Association Between Nap and Reported Cognitive Function and Role of Sleep Debt: A Population-Based Study." *Journal of Clinical Neurology*, 2022;18(4):470-477. DOI: [10.3988/jcn.2022.18.4.470](https://doi.org/10.3988/jcn.2022.18.4.470)
 
 *(本章は、ChatGPTによる独立査読を踏まえ、「睡眠負債」「認知機能」がいずれも自己申告の指標であることを明記し、「効果が逆転する」という表現を「関連が異なる」に訂正しています。)*
 

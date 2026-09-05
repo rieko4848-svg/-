@@ -22,6 +22,6 @@
 
 ---
 
-**参考文献**: "Efficacy of lifestyle medicine on sleep quality: A meta-analysis of randomized controlled trials." *Journal of Affective Disorders*, 2023. DOI: [10.1016/j.jad.2023.02.111](https://doi.org/10.1016/j.jad.2023.02.111)
+**参考文献**: Wong A, et al. "Efficacy of lifestyle medicine on sleep quality: A meta-analysis of randomized controlled trials." *Journal of Affective Disorders*, 2023. DOI: [10.1016/j.jad.2023.02.111](https://doi.org/10.1016/j.jad.2023.02.111)
 
 *(本章は、ChatGPTによる独立査読を踏まえ、「非活動的な対照群」と「活動的な対照群」の違い、およびサブグループ解析であることを明記する形に訂正しています。)*
