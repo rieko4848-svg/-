@@ -75,6 +75,8 @@ Get the user's sign-off on the outline before drafting — it's much cheaper to 
 
 Once locked, **write one chapter at a time**, on request (e.g. "第1章書いて" / "write chapter 1"), each backed only by claims traceable to `evidence-db.md`. Do not generate the entire article in one pass — quality degrades badly over very long single-shot generations, especially in later sections. Save each chapter as its own file under `chapters/`.
 
+`evidence-db.md` is a backstage file the reader never sees. If a chapter cites a study, put that study's title, journal, year, and DOI in the chapter's own text (e.g. a short "参考文献" line at the end) — not just in the database. The entire credibility pitch of this method is that claims are independently checkable; that only holds if the citation actually reaches the reader.
+
 ---
 
 ## Step 5 — Independent peer review (don't let the writer grade its own exam)

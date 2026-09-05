@@ -13,3 +13,7 @@
 つまり、「運動は睡眠の質を良くする可能性が高い、有望な選択肢の一つ」とは言えますが、「運動さえすれば誰でも必ず眠れるようになる」とまでは、まだ言い切れないということです。この、ちょっとしたニュアンスの違いを大事にしたいと思っています。
 
 では、運動だけでなく、いくつかの生活習慣を組み合わせるとどうなるのでしょうか。次の章では、23件もの研究をまとめて調べた、もう一段階信頼度の高いデータを見ていきます。
+
+---
+
+**参考文献**: Jurado-Fasoli L, De-la-O A, Molina-Hidalgo C, Migueles JH, Castillo MJ, Amaro-Gahete FJ. "Exercise training improves sleep quality: A randomized controlled trial." *European Journal of Clinical Investigation*, 2020. DOI: [10.1111/eci.13202](https://doi.org/10.1111/eci.13202)

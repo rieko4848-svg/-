@@ -17,3 +17,7 @@
 もちろん、ここにも限界があります。この研究は、日本のある一つの職場で働く方々を対象にした、単独の研究です。業種や働き方が違う職場、あるいは職場に属していない方にも同じように当てはまるかどうかは、この研究だけでは分かりません。同じ規模で他の職場でも確かめた追試も、今のところ見当たりませんでした。
 
 とはいえ、「刺激制御法」や「睡眠制限法」のような考え方は、特定の職場だけで使える特別な技術というより、日常の行動パターンの工夫です。次の章でご紹介するのは、こうした工夫を手軽に取り入れるための、もう一つの選択肢——スマートフォンのアプリを使った研究です。
+
+---
+
+**参考文献**: Kaku A, et al. "Randomized Controlled Trial on the Effects of a Combined Sleep Hygiene Education and Behavioral Approach Program on Sleep Quality in Workers with Insomnia." *Industrial Health*, 2012;50(1):52-59. DOI: [10.2486/indhealth.MS1318](https://doi.org/10.2486/indhealth.MS1318)

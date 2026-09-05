@@ -15,3 +15,7 @@
 とはいえ、「まず何か一つ試してみたい、でも大きな生活の変化はハードルが高い」という方にとって、アプリのような手軽な選択肢があること自体は、知っておいて損はないと思います。
 
 さて、次の章では少し毛色の違う話をします。「昼寝」です。昼寝は「した方がいい」「しない方がいい」という、相反する話をよく耳にしませんか?実はそこには、その人がどれくらい睡眠不足を抱えているか、という条件が関わっていることが分かってきています。
+
+---
+
+**参考文献**: Munt O, Schredl M, Gottlieb E, Fischer S, Gautschi D, Gahan L, Schoebel C. "The effects of a personalized sleep improvement app in subclinical poor sleepers: A randomized controlled trial." *Journal of Sleep Research*, 2025;34(6):e14445. DOI: [10.1111/jsr.14445](https://doi.org/10.1111/jsr.14445)

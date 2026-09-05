@@ -40,6 +40,10 @@
 
 ---
 
+**参考文献**: Jurado-Fasoli L, De-la-O A, Molina-Hidalgo C, Migueles JH, Castillo MJ, Amaro-Gahete FJ. "Exercise training improves sleep quality: A randomized controlled trial." *European Journal of Clinical Investigation*, 2020. DOI: [10.1111/eci.13202](https://doi.org/10.1111/eci.13202)
+
+---
+
 # 第3章 生活習慣を組み合わせるほど眠りは変わる、効果はまだ短期実証のみ
 
 (公開範囲:有料)
@@ -59,6 +63,10 @@
 この2つの限界を踏まえたうえで、私なりの受け取り方をお伝えすると、「一つの魔法のような習慣を探すより、無理のない範囲でいくつかの習慣を同時に見直すほうが、変化を感じやすい可能性がある」ということだと思っています。特に、すでにかなり眠りに悩んでいる方ほど、変化を実感しやすいという結果は、一つの支えになるのではないでしょうか。
 
 次の章では、実際に「職場」という現場で、行動そのものを変えるプログラムを試した研究をご紹介します。特別な道具も、大きな生活の変化も必要としない、身近な工夫の話です。
+
+---
+
+**参考文献**: "Efficacy of lifestyle medicine on sleep quality: A meta-analysis of randomized controlled trials." *Journal of Affective Disorders*, 2023. DOI: [10.1016/j.jad.2023.02.111](https://doi.org/10.1016/j.jad.2023.02.111)
 
 ---
 
@@ -84,6 +92,10 @@
 
 ---
 
+**参考文献**: Kaku A, et al. "Randomized Controlled Trial on the Effects of a Combined Sleep Hygiene Education and Behavioral Approach Program on Sleep Quality in Workers with Insomnia." *Industrial Health*, 2012;50(1):52-59. DOI: [10.2486/indhealth.MS1318](https://doi.org/10.2486/indhealth.MS1318)
+
+---
+
 # 第5章 スマホアプリという手軽な入り口
 
 (公開範囲:有料)
@@ -104,6 +116,10 @@
 
 ---
 
+**参考文献**: Munt O, Schredl M, Gottlieb E, Fischer S, Gautschi D, Gahan L, Schoebel C. "The effects of a personalized sleep improvement app in subclinical poor sleepers: A randomized controlled trial." *Journal of Sleep Research*, 2025;34(6):e14445. DOI: [10.1111/jsr.14445](https://doi.org/10.1111/jsr.14445)
+
+---
+
 # 第6章 昼寝は諸刃の剣、睡眠負債で使い方が変わる
 
 (公開範囲:有料)
@@ -121,6 +137,10 @@
 こうした限界を踏まえたうえでの、一つの受け取り方をお伝えします。「昼寝は誰にとっても同じように良い・悪いと決めつけるのではなく、自分がどれくらい睡眠不足を抱えているかによって、向き合い方を変えてみる」という視点は、持っておいて損はないと思います。あくまで「そういう関連が見られている」という情報として、参考にしていただければと思います。
 
 ここまで、運動・生活習慣・職場での行動プログラム・アプリ・昼寝という5つの切り口から、それぞれの研究とその限界をお伝えしてきました。最後の章では、これらを整理して、今のあなたの状況に合わせてどこから手をつければいいかを一緒に考えていきます。
+
+---
+
+**参考文献**: "Association Between Nap and Reported Cognitive Function and Role of Sleep Debt: A Population-Based Study." *Journal of Clinical Neurology*, 2022;18(4):470-477. DOI: [10.3988/jcn.2022.18.4.470](https://doi.org/10.3988/jcn.2022.18.4.470)
 
 ---
 
