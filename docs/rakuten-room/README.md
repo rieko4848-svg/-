@@ -9,6 +9,7 @@
 | [02-post-examples.md](02-post-examples.md) | そのまま使える投稿文20本（2026年 秋〜冬） |
 | [04-diagnosis.md](04-diagnosis.md) | **実データ診断（2026年1〜9月）**。ボトルネックは紹介文ではなく露出 |
 | [05-original-photo.md](05-original-photo.md) | **オリジナル写真が承認されない原因**と投稿前チェックリスト |
+| [06-first-post.md](06-first-post.md) | 1本目（オートミール）の診断と書き直し・再投稿の手順 |
 | [03-profile.md](03-profile.md) | プロフィール診断・テーマの絞り込み・書き直し案・再開1週目のメニュー |
 | [room-lab.html](room-lab.html) | 上記をスマホで使える形にした投稿文ジェネレーター（規約チェッカー付き） |
 
