@@ -106,6 +106,11 @@ mark.ng{background:var(--alert-soft);color:var(--alert);padding:0 2px;border-rad
 mark.cau{background:var(--warn-soft);color:var(--warn);padding:0 2px;border-radius:2px;}
 
 /* checker */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.earn{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);
+  font-family:var(--mono);font-size:12px;color:var(--sub);line-height:1.9;font-variant-numeric:tabular-nums;}
+.earn b{color:var(--ink);font-size:14px;}
+#verdict.go{color:var(--ok);} #verdict.mid{color:var(--warn);} #verdict.no{color:var(--alert);}
 .check{border:1px solid var(--line);border-radius:2px;padding:12px 14px;background:var(--paper);}
 .check-hd{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;margin-bottom:6px;}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none;}
@@ -182,15 +187,92 @@ td.k{font-family:var(--mono);font-size:11px;color:var(--sub);white-space:nowrap;
 
   <nav>
     <div class="tabs" role="tablist">
-      <button class="tab" id="tab-make" role="tab" aria-selected="true" aria-controls="p-make">作る</button>
+      <button class="tab" id="tab-pick" role="tab" aria-selected="true" aria-controls="p-pick">選ぶ</button>
+      <button class="tab" id="tab-make" role="tab" aria-selected="false" aria-controls="p-make">作る</button>
       <button class="tab" id="tab-kata" role="tab" aria-selected="false" aria-controls="p-kata">型</button>
       <button class="tab" id="tab-ex" role="tab" aria-selected="false" aria-controls="p-ex">例文</button>
       <button class="tab" id="tab-plan" role="tab" aria-selected="false" aria-controls="p-plan">戦略</button>
     </div>
   </nav>
 
+  <!-- ========== 選ぶ ========== -->
+  <section id="p-pick" role="tabpanel" aria-labelledby="tab-pick" class="stack">
+    <div class="head"><h2>この商品、投稿する？</h2><span>SCREENER</span></div>
+    <p class="note">商品ページで見える数字を入れると、投稿するかどうかが機械的に決まります。<b>迷う時間をなくすための道具</b>なので、迷ったら捨てて次に行ってください。</p>
+
+    <div class="field">
+      <label for="s-name">商品名 <span class="hint">／ メモ用</span></label>
+      <input type="text" id="s-name" placeholder="スターフィルター 換気扇フィルター">
+    </div>
+
+    <div class="field">
+      <label>放置したらどうなるか、1行で書ける？ <span class="hint">／ いちばん硬いフィルタ</span></label>
+      <div class="seg" id="s-solveSeg">
+        <button type="button" data-v="1" aria-pressed="true">書ける</button>
+        <button type="button" data-v="0" aria-pressed="false">書けない</button>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label for="s-price">価格（円）</label>
+        <input type="text" inputmode="numeric" id="s-price" placeholder="2480">
+      </div>
+      <div class="field">
+        <label for="s-rate">料率（%）</label>
+        <input type="text" inputmode="decimal" id="s-rate" placeholder="3">
+      </div>
+      <div class="field">
+        <label for="s-rev">レビュー数</label>
+        <input type="text" inputmode="numeric" id="s-rev" placeholder="1200">
+      </div>
+      <div class="field">
+        <label for="s-star">★（5点満点）</label>
+        <input type="text" inputmode="decimal" id="s-star" placeholder="4.5">
+      </div>
+      <div class="field" style="grid-column:1/-1">
+        <label for="s-col">ROOMのコレ数 <span class="hint">／ わからなければ空欄</span></label>
+        <input type="text" inputmode="numeric" id="s-col" placeholder="800">
+      </div>
+    </div>
+
+    <div class="out">
+      <div class="out-top">
+        <strong id="verdict">判定</strong>
+        <span class="counts" id="score">— pt</span>
+      </div>
+      <div id="vReason" class="note" style="line-height:1.9"></div>
+      <div id="vEarn" class="earn"></div>
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn btn-main" type="button" id="toMake">投稿文をつくる</button>
+        <button class="btn" type="button" id="sReset">次の商品へ</button>
+      </div>
+    </div>
+
+    <div class="head"><h2>採点の中身</h2><span>RUBRIC</span></div>
+    <div class="scroll">
+      <table>
+        <tr><th>項目</th><th>加点</th></tr>
+        <tr><td>料率 8%以上 ／ 4〜8% ／ 3%台 ／ 3%未満</td><td class="k">+3 ／ +2 ／ +1 ／ 0</td></tr>
+        <tr><td>レビュー 500件以上 ／ 100〜499 ／ 100未満</td><td class="k">+2 ／ +1 ／ −1</td></tr>
+        <tr><td>★ 4.3以上 ／ 3.8未満</td><td class="k">+1 ／ −2</td></tr>
+        <tr><td>コレ数 300〜5,000（伸び盛り）／ 5,000超（定番）</td><td class="k">+2 ／ +1</td></tr>
+        <tr><td>価格 1,000〜5,000円 ／ 5,001〜15,000円</td><td class="k">+2 ／ +1</td></tr>
+        <tr><td>放置したらどうなるかが書けない</td><td class="k">即・捨てる</td></tr>
+      </table>
+    </div>
+
+    <div class="head"><h2>いま上位にいる商品</h2><span>2026.09.11 時点</span></div>
+    <p class="note">検索で拾えた実際の上位商品です。<b>料率とコレ数は各自で確認してください</b>（この2つは商品ページとROOMでしか見られません）。タップで判定シートに名前が入ります。</p>
+    <div class="rows" id="candList"></div>
+    <div class="card">
+      <p style="margin:0 0 6px;font-size:13.5px;font-weight:700;color:var(--warn)">商品名の「楽天1位」に注意</p>
+      <p class="note">商品名に入っている「楽天1位獲得」「6年連続No.1」は、多くが<b>過去の実績をショップが自称しているもの</b>で、今の順位ではありません。順位はランキングページ側で確認してください。</p>
+    </div>
+  </section>
+
   <!-- ========== 作る ========== -->
-  <section id="p-make" role="tabpanel" aria-labelledby="tab-make" class="stack">
+  <section id="p-make" role="tabpanel" aria-labelledby="tab-make" class="stack" hidden>
     <div class="head"><h2>投稿文をつくる</h2><span>GENERATOR</span></div>
     <p class="note">埋めるほど精度が上がりますが、<b>困り事</b>と<b>放置すると</b>の2つだけでも形になります。体験の行は必ず自分の事実に直してください。</p>
 
@@ -629,6 +711,109 @@ const EX = [
     });
   });
 })();
+
+/* ---------- 商品スクリーナー ---------- */
+const CANDS = [
+  ['スターフィルター 換気扇フィルター','楽天総合1位','換気扇の油汚れ'],
+  ['レンジガード 4面 5面 ガスコンロ IH','調理小道具立て 1位','コンロまわりの油はね'],
+  ['CLEVHOM 圧縮袋 圧縮ボックス','楽天1位獲得（羽毛布団・衣類）','入りきらない冬物'],
+  ['遮光シート 窓 完全遮熱シート','累計10,000セット超','窓からの熱と冷え'],
+  ['ペーパータオル12ロール カークランド','キッチンペーパー 1位','布巾を洗う手間'],
+  ['ヒートシーラー ミニシーラー 充電式','キッチン上位','開封した袋の湿気'],
+  ['マットレス「純」高反発','6年連続No.1を自称','朝起きたときの腰']
+];
+let pickPain='';
+(function buildCands(){
+  const box=$('#candList');
+  CANDS.forEach(([name,rank,pain])=>{
+    const r=document.createElement('div'); r.className='row';
+    r.innerHTML='<p>'+esc(name)+'<br><span style="font-size:11px;color:var(--faint)">'
+      +esc(rank)+'　／　困り事：'+esc(pain)+'</span></p>';
+    const b=document.createElement('button'); b.className='btn-mini'; b.type='button'; b.textContent='判定';
+    b.addEventListener('click',()=>{
+      $('#s-name').value=name; pickPain=pain; scoreIt();
+      window.scrollTo({top:0,behavior:'smooth'}); toast('判定シートに入れました');
+    });
+    r.appendChild(b); box.appendChild(r);
+  });
+})();
+
+let solvable=1;
+$('#s-solveSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-v]'); if(!b) return;
+  solvable=+b.dataset.v;
+  document.querySelectorAll('#s-solveSeg button').forEach(o=>o.setAttribute('aria-pressed',o===b?'true':'false'));
+  scoreIt();
+});
+const num = id => { const n=parseFloat($(id).value.replace(/[^0-9.]/g,'')); return isNaN(n)?null:n; };
+
+function scoreIt(){
+  const price=num('#s-price'), rate=num('#s-rate'), rev=num('#s-rev'),
+        star=num('#s-star'), col=num('#s-col');
+  const V=$('#verdict'), S=$('#score'), R=$('#vReason'), E=$('#vEarn');
+  const why=[];
+  let pt=0;
+  if(rate!==null){
+    if(rate>=8){pt+=3;why.push('料率'+rate+'% → <b>+3</b>（ここが利益の源泉）');}
+    else if(rate>=4){pt+=2;why.push('料率'+rate+'% → +2');}
+    else if(rate>=3){pt+=1;why.push('料率'+rate+'% → +1');}
+    else why.push('料率'+rate+'% → 0（低い）');
+  }
+  if(rev!==null){
+    if(rev>=500){pt+=2;why.push('レビュー'+rev+'件 → +2（売れている証拠）');}
+    else if(rev>=100){pt+=1;why.push('レビュー'+rev+'件 → +1');}
+    else {pt-=1;why.push('レビュー'+rev+'件 → <b>−1</b>（実績が薄い）');}
+  }
+  if(star!==null){
+    if(star>=4.3){pt+=1;why.push('★'+star+' → +1');}
+    else if(star<3.8){pt-=2;why.push('★'+star+' → <b>−2</b>（低評価は紹介しない）');}
+  }
+  if(col!==null){
+    if(col>=300&&col<=5000){pt+=2;why.push('コレ数'+col+' → +2（伸び盛りゾーン）');}
+    else if(col>5000){pt+=1;why.push('コレ数'+col+' → +1（定番。埋もれやすい）');}
+    else why.push('コレ数'+col+' → 0（ROOM内でまだ動いていない）');
+  }
+  if(price!==null){
+    if(price>=1000&&price<=5000){pt+=2;why.push('価格'+price.toLocaleString()+'円 → +2（回転する帯）');}
+    else if(price<=15000){pt+=1;why.push('価格'+price.toLocaleString()+'円 → +1');}
+    else why.push('価格'+price.toLocaleString()+'円 → 0（高額は安定しない）');
+  }
+
+  let cls,label,lead;
+  if(!solvable){
+    cls='no'; label='捨てる'; pt=0;
+    lead='「放置したらどうなるか」が書けない商品は、どれだけ売れていても投稿しない。ここがいちばん硬いフィルタです。';
+  } else if(rev!==null&&rev<100&&rate!==null&&rate<3){
+    cls='no'; label='捨てる';
+    lead='レビュー100件未満かつ料率3%未満。リサーチ手順で切り捨てる条件に当たります。';
+  } else if(pt>=7){ cls='go'; label='本命'; lead='今週の本命枠。時間をかけて書く価値があります。オリジナル写真が撮れるならなお良い。'; }
+  else if(pt>=4){ cls='go'; label='投稿していい'; lead='悪くない枠。サッと書いて出す。'; }
+  else if(price===null&&rate===null&&rev===null){ cls=''; label='判定'; lead='数字を入れると判定します。'; }
+  else { cls='mid'; label='見送り'; lead='優先度は低め。もっと良い候補を探したほうが早いです。'; }
+
+  V.className=cls; V.textContent=label;
+  S.textContent=(price===null&&rate===null&&rev===null)?'— pt':pt+' pt';
+  R.innerHTML=lead+(why.length?'<br><br>'+why.join('<br>'):'');
+
+  if(price!==null&&rate!==null&&rate>0){
+    const fee=Math.floor(price*rate/100);
+    const bonus=Math.floor(price*(rate+3)/100);
+    const need=fee>0?Math.ceil(10000/fee):0;
+    E.innerHTML='1件売れて <b>'+fee.toLocaleString()+'円</b>'
+      +'（ランクB以上のボーナス込みで最大 '+bonus.toLocaleString()+'円）<br>'
+      +'月1万円に必要な販売数 <b>'+need+'件</b>';
+  } else E.innerHTML='';
+}
+['#s-price','#s-rate','#s-rev','#s-star','#s-col','#s-name'].forEach(id=>$(id).addEventListener('input',scoreIt));
+$('#sReset').addEventListener('click',()=>{
+  ['#s-name','#s-price','#s-rate','#s-rev','#s-star','#s-col'].forEach(id=>$(id).value='');
+  pickPain=''; scoreIt(); toast('クリアしました');
+});
+$('#toMake').addEventListener('click',()=>{
+  if(pickPain && !$('#f-pain').value) $('#f-pain').value=pickPain;
+  $('#tab-make').click();
+});
+scoreIt();
 
 /* ---------- 規約チェッカー ---------- */
 const NG = [
