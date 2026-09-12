@@ -8,6 +8,7 @@
 | [01-post-templates.md](01-post-templates.md) | 投稿文の3つの型・実害の4方向・1行目ストック30本・投稿前チェック |
 | [02-post-examples.md](02-post-examples.md) | そのまま使える投稿文20本（2026年 秋〜冬） |
 | [04-diagnosis.md](04-diagnosis.md) | **実データ診断（2026年1〜9月）**。ボトルネックは紹介文ではなく露出 |
+| [05-original-photo.md](05-original-photo.md) | **オリジナル写真が承認されない原因**と投稿前チェックリスト |
 | [03-profile.md](03-profile.md) | プロフィール診断・テーマの絞り込み・書き直し案・再開1週目のメニュー |
 | [room-lab.html](room-lab.html) | 上記をスマホで使える形にした投稿文ジェネレーター（規約チェッカー付き） |
 
