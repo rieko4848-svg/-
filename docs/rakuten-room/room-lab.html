@@ -1,0 +1,700 @@
+<title>楽天ROOM 投稿ラボ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F1EFE7; --paper:#FAF8F3; --raise:#FFFFFF;
+  --ink:#232323; --sub:#6B6B66; --faint:#8E8C84;
+  --line:#DDD9CF; --line-soft:#E8E5DC;
+  --accent:#1F4B3F; --accent-soft:#E3EAE4; --accent-ink:#1F4B3F;
+  --alert:#9B2C2C; --alert-soft:#F6E6E4;
+  --warn:#8A5A1C; --warn-soft:#F6EEDF;
+  --ok:#2F6B4F;
+  --serif:'Zen Old Mincho',"Hiragino Mincho ProN","Yu Mincho",serif;
+  --sans:'Noto Sans JP',-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#171613; --paper:#201F1B; --raise:#262520;
+    --ink:#EDEBE4; --sub:#A6A49C; --faint:#8B8981;
+    --line:#3A3A36; --line-soft:#302F2A;
+    --accent:#7FB39C; --accent-soft:#22302A; --accent-ink:#9CC9B4;
+    --alert:#E38B84; --alert-soft:#33221F;
+    --warn:#D6AC6E; --warn-soft:#2E2618;
+    --ok:#7FB39C;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#171613; --paper:#201F1B; --raise:#262520;
+  --ink:#EDEBE4; --sub:#A6A49C; --faint:#8B8981;
+  --line:#3A3A36; --line-soft:#302F2A;
+  --accent:#7FB39C; --accent-soft:#22302A; --accent-ink:#9CC9B4;
+  --alert:#E38B84; --alert-soft:#33221F;
+  --warn:#D6AC6E; --warn-soft:#2E2618;
+  --ok:#7FB39C;
+}
+*{box-sizing:border-box;}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.8;-webkit-text-size-adjust:100%;}
+.wrap{max-width:560px;margin:0 auto;padding-inline:18px;padding-block:22px 72px;}
+
+/* masthead */
+.mast{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+  border-bottom:1px solid var(--line);padding-bottom:14px;}
+.mast h1{font-family:var(--serif);font-size:21px;font-weight:700;margin:0;letter-spacing:.04em;
+  text-wrap:balance;}
+.mast p{margin:4px 0 0;font-size:11.5px;color:var(--sub);line-height:1.6;}
+.stamp{font-family:var(--mono);font-size:10px;color:var(--faint);white-space:nowrap;
+  border:1px solid var(--line);padding:3px 7px;border-radius:2px;}
+
+/* tabs */
+nav{position:sticky;top:0;z-index:20;background:var(--ground);
+  padding-block:10px;margin-bottom:18px;border-bottom:1px solid var(--line-soft);}
+.tabs{display:flex;gap:5px;}
+.tab{flex:1;padding:9px 4px;font-size:12.5px;font-weight:500;text-align:center;cursor:pointer;
+  border:1px solid var(--line);background:var(--paper);color:var(--sub);border-radius:2px;
+  font-family:inherit;transition:background .12s,color .12s,border-color .12s;}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--ground);}
+:root[data-theme="dark"] .tab[aria-selected="true"],
+:root:not([data-theme="light"]) .tab[aria-selected="true"]{color:#12140F;}
+.tab:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;}
+
+section[hidden]{display:none!important;}
+.stack{display:flex;flex-direction:column;gap:16px;}
+
+/* section heads */
+.head{display:flex;align-items:baseline;gap:9px;margin:6px 0 0;}
+.head h2{font-family:var(--serif);font-size:16px;font-weight:700;margin:0;letter-spacing:.03em;}
+.head span{font-family:var(--mono);font-size:10px;color:var(--faint);}
+.note{font-size:12.5px;color:var(--sub);margin:0;line-height:1.75;}
+
+/* form */
+.field{display:flex;flex-direction:column;gap:5px;}
+label{font-size:11.5px;font-weight:500;color:var(--sub);letter-spacing:.04em;}
+label .hint{font-weight:400;color:var(--faint);font-size:10.5px;}
+input[type=text],textarea,select{width:100%;font-family:inherit;font-size:14px;color:var(--ink);
+  background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:9px 10px;line-height:1.7;}
+textarea{resize:vertical;}
+.seg{display:flex;gap:5px;flex-wrap:wrap;}
+.seg button{flex:1 1 30%;min-width:104px;padding:8px 6px;font-size:12px;font-family:inherit;
+  border:1px solid var(--line);background:var(--paper);color:var(--sub);border-radius:2px;cursor:pointer;}
+.seg button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:500;}
+.dmg{display:grid;grid-template-columns:auto 1fr;gap:6px;align-items:center;}
+.dmg select{width:auto;min-width:112px;font-size:12.5px;padding:8px 6px;}
+
+.btn{font-family:inherit;font-size:13px;padding:10px 14px;border-radius:2px;cursor:pointer;
+  border:1px solid var(--line);background:var(--paper);color:var(--ink);}
+.btn:hover{border-color:var(--accent);}
+.btn-main{background:var(--accent);border-color:var(--accent);color:var(--ground);font-weight:500;}
+:root[data-theme="dark"] .btn-main,:root:not([data-theme="light"]) .btn-main{color:#12140F;}
+.btn-row{display:flex;gap:8px;}
+.btn-row .btn{flex:1;}
+.btn-mini{font-size:11px;padding:5px 9px;border:1px solid var(--line);background:var(--paper);
+  color:var(--sub);border-radius:2px;cursor:pointer;font-family:var(--mono);white-space:nowrap;}
+.btn-mini:hover{border-color:var(--accent);color:var(--accent-ink);}
+
+/* output */
+.out{border:1px solid var(--ink);border-radius:2px;background:var(--raise);padding:16px 16px 12px;}
+.out-top{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border-bottom:1px dashed var(--line);padding-bottom:8px;margin-bottom:12px;}
+.out-top strong{font-family:var(--serif);font-size:13px;letter-spacing:.05em;}
+.counts{font-family:var(--mono);font-size:10px;color:var(--faint);font-variant-numeric:tabular-nums;}
+#outText{white-space:pre-wrap;font-size:14.5px;line-height:1.95;min-height:120px;}
+#outText .fl{font-family:var(--serif);font-size:16.5px;font-weight:700;line-height:1.7;display:block;margin-bottom:6px;}
+mark.ng{background:var(--alert-soft);color:var(--alert);padding:0 2px;border-radius:2px;font-weight:500;}
+mark.cau{background:var(--warn-soft);color:var(--warn);padding:0 2px;border-radius:2px;}
+
+/* checker */
+.check{border:1px solid var(--line);border-radius:2px;padding:12px 14px;background:var(--paper);}
+.check-hd{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;margin-bottom:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none;}
+.dot.bad{background:var(--alert);} .dot.mid{background:var(--warn);}
+.check ul{margin:0;padding-left:17px;font-size:12px;color:var(--sub);line-height:1.85;}
+.check li b{color:var(--ink);}
+
+/* lists */
+.card{border:1px solid var(--line);border-radius:2px;background:var(--paper);padding:14px 15px;}
+.card.lift{border-left:3px solid var(--accent);}
+.rows{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:2px;background:var(--paper);}
+.row{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;
+  padding:10px 13px;border-bottom:1px solid var(--line-soft);}
+.row:last-child{border-bottom:none;}
+.row p{margin:0;font-size:13px;line-height:1.7;flex:1;}
+.row .n{font-family:var(--mono);font-size:10px;color:var(--faint);flex:none;width:18px;padding-top:3px;
+  font-variant-numeric:tabular-nums;}
+.grp{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--faint);
+  padding:12px 13px 5px;border-bottom:1px solid var(--line-soft);}
+
+details{border:1px solid var(--line);border-radius:2px;background:var(--paper);}
+details+details{margin-top:8px;}
+summary{cursor:pointer;padding:11px 14px;font-size:13.5px;font-weight:500;list-style:none;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;}
+summary::-webkit-details-marker{display:none;}
+summary::after{content:"＋";font-family:var(--mono);color:var(--faint);font-size:13px;}
+details[open] summary::after{content:"−";}
+details[open] summary{border-bottom:1px solid var(--line-soft);}
+.ex{padding:12px 14px 14px;}
+.ex pre{margin:0 0 10px;font-family:var(--sans);font-size:13.5px;line-height:1.9;white-space:pre-wrap;
+  color:var(--ink);}
+.ex pre .fl{font-family:var(--serif);font-weight:700;font-size:15px;}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:2px;background:var(--paper);}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line-soft);vertical-align:top;}
+th{font-size:10.5px;letter-spacing:.06em;color:var(--faint);font-weight:500;white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+td.k{font-family:var(--mono);font-size:11px;color:var(--sub);white-space:nowrap;font-variant-numeric:tabular-nums;}
+
+.steps{counter-reset:s;list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+.steps li{counter-increment:s;display:grid;grid-template-columns:22px 1fr;gap:10px;font-size:13px;line-height:1.8;}
+.steps li::before{content:counter(s);font-family:var(--mono);font-size:11px;color:var(--accent-ink);
+  border:1px solid var(--accent);border-radius:50%;width:22px;height:22px;display:grid;place-items:center;margin-top:3px;}
+.steps a{color:var(--accent-ink);}
+
+.swap{border:1px solid var(--line);border-radius:2px;overflow:hidden;}
+.swap div{display:grid;grid-template-columns:1fr 1fr;font-size:12.5px;}
+.swap div:not(:last-child){border-bottom:1px solid var(--line-soft);}
+.swap span{padding:8px 11px;line-height:1.7;}
+.swap span:first-child{color:var(--alert);border-right:1px solid var(--line-soft);background:var(--alert-soft);}
+.swap span:last-child{color:var(--ok);}
+.swap .hd span{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--faint);background:var(--paper);}
+
+.foot{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);
+  font-size:11px;color:var(--faint);line-height:1.8;}
+.foot a{color:var(--sub);}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(12px);
+  background:var(--ink);color:var(--ground);font-size:12px;padding:8px 16px;border-radius:2px;
+  opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:60;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+@media (max-width:400px){.seg button{flex:1 1 46%;}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div>
+      <h1>楽天ROOM 投稿ラボ</h1>
+      <p>商品を説明しない。困り事と、その先を書く。</p>
+    </div>
+    <div class="stamp">2026.09</div>
+  </header>
+
+  <nav>
+    <div class="tabs" role="tablist">
+      <button class="tab" id="tab-make" role="tab" aria-selected="true" aria-controls="p-make">作る</button>
+      <button class="tab" id="tab-kata" role="tab" aria-selected="false" aria-controls="p-kata">型</button>
+      <button class="tab" id="tab-ex" role="tab" aria-selected="false" aria-controls="p-ex">例文</button>
+      <button class="tab" id="tab-plan" role="tab" aria-selected="false" aria-controls="p-plan">戦略</button>
+    </div>
+  </nav>
+
+  <!-- ========== 作る ========== -->
+  <section id="p-make" role="tabpanel" aria-labelledby="tab-make" class="stack">
+    <div class="head"><h2>投稿文をつくる</h2><span>GENERATOR</span></div>
+    <p class="note">埋めるほど精度が上がりますが、<b>困り事</b>と<b>放置すると</b>の2つだけでも形になります。体験の行は必ず自分の事実に直してください。</p>
+
+    <div class="field">
+      <label>型をえらぶ</label>
+      <div class="seg" id="kataSeg">
+        <button type="button" data-k="A" aria-pressed="true">① 未来分岐型</button>
+        <button type="button" data-k="B" aria-pressed="false">② 3秒共感型</button>
+        <button type="button" data-k="C" aria-pressed="false">③ 損失回避型</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="f-who">誰に向けて <span class="hint">／ 場面や属性</span></label>
+      <input type="text" id="f-who" placeholder="共働きで小学生がいる家">
+    </div>
+
+    <div class="field">
+      <label for="f-pain">困り事 <span class="hint">／ 1行目の核になります</span></label>
+      <input type="text" id="f-pain" placeholder="排水口のヌメリ">
+    </div>
+
+    <div class="field">
+      <label for="f-hook">1行目 <span class="hint">／ 空欄なら自動生成。引くボタンで差し替え</span></label>
+      <input type="text" id="f-hook" placeholder="（自動）">
+      <div class="btn-row">
+        <button class="btn" type="button" id="drawHook">1行目を引く</button>
+        <button class="btn" type="button" id="clearHook">自動に戻す</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>放置すると <span class="hint">／ 方向を選んで、具体的に1行</span></label>
+      <div class="dmg">
+        <select id="f-d1k">
+          <option value="money">💰 お金が減る</option>
+          <option value="time">⏳ 時間が消える</option>
+          <option value="eyes">👀 人に見られる</option>
+          <option value="gone">🚪 後戻りできない</option>
+        </select>
+        <input type="text" id="f-d1" placeholder="年末の大掃除で2時間が消える">
+      </div>
+      <div class="dmg" style="margin-top:6px">
+        <select id="f-d2k">
+          <option value="eyes">👀 人に見られる</option>
+          <option value="money">💰 お金が減る</option>
+          <option value="time">⏳ 時間が消える</option>
+          <option value="gone">🚪 後戻りできない</option>
+        </select>
+        <input type="text" id="f-d2" placeholder="気づくのはたいてい来客の5分前">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="f-act">この商品でやること <span class="hint">／ 動作は1つだけ</span></label>
+      <input type="text" id="f-act" placeholder="ゴミ受けの上に月1で置くだけ">
+    </div>
+
+    <div class="field">
+      <label for="f-exp">自分の事実 <span class="hint">／ 感想型。使っていない体験は書かない</span></label>
+      <input type="text" id="f-exp" placeholder="うちは3か月、あの掃除を1回もしていない">
+    </div>
+
+    <div class="field">
+      <label for="f-now">今買う理由 <span class="hint">／ セール・季節・在庫</span></label>
+      <input type="text" id="f-now" placeholder="スーパーSALEで買い置きしておく枠">
+    </div>
+
+    <div class="field">
+      <label for="f-tag">ハッシュタグ <span class="hint">／ 悩みワード＋属性＋汎用</span></label>
+      <input type="text" id="f-tag" placeholder="排水口 ヌメリ取り 時短家事 楽天ROOM">
+    </div>
+
+    <div class="out">
+      <div class="out-top">
+        <strong>できあがり</strong>
+        <span class="counts" id="counts">0字 ／ 0行</span>
+      </div>
+      <div id="outText"></div>
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn btn-main" type="button" id="copyOut">コピーする</button>
+        <button class="btn" type="button" id="resetAll">全部消す</button>
+      </div>
+    </div>
+
+    <div class="check" id="checkBox">
+      <div class="check-hd"><span class="dot" id="checkDot"></span><span id="checkTitle">規約チェック：問題なし</span></div>
+      <ul id="checkList"><li>薬機法・景表法に触れやすい語は見つかりませんでした。</li></ul>
+    </div>
+  </section>
+
+  <!-- ========== 型 ========== -->
+  <section id="p-kata" role="tabpanel" aria-labelledby="tab-kata" class="stack" hidden>
+    <div class="head"><h2>読まれるのは最初の2行だけ</h2><span>STRUCTURE</span></div>
+    <div class="card lift">
+      <p class="note" style="color:var(--ink)">ROOMのタイムラインで見えるのは冒頭2〜3行。続きは「もっと見る」を押した人しか読みません。だから構造はこうなります。</p>
+      <div class="scroll" style="margin-top:12px;border:none">
+        <table>
+          <tr><td class="k">1行目</td><td>「私のことだ」と思わせる。勝負の9割。商品名は入れない</td></tr>
+          <tr><td class="k">2行目</td><td>放置したときの実害を<b>1つだけ</b>、具体的に</td></tr>
+          <tr><td class="k" style="color:var(--faint)">――</td><td style="color:var(--faint)">ここから先は「もっと見る」を押した人だけ</td></tr>
+          <tr><td class="k">3行目〜</td><td>実害の追撃 → 転換 → 使用イメージ → 自分の事実 → 今買う理由 → タグ</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="head"><h2>実害は4方向のどれか</h2><span>DAMAGE</span></div>
+    <p class="note">「放置したらどうなるか」が出てこないときは、この4つに当てはめます。大げさな煽りではなく、<b>小さくて確実に起きること</b>を書くのがコツ。</p>
+    <div class="scroll">
+      <table>
+        <tr><th>方向</th><th>自分への問い</th><th>書き方の例</th></tr>
+        <tr><td class="k">💰 お金</td><td>買い直し・電気代・修理代はいくら？</td><td>結露を放置した壁紙の張り替えは1面◯万円</td></tr>
+        <tr><td class="k">⏳ 時間</td><td>毎日何分 × 365日？</td><td>1日5分の探し物は、年で30時間</td></tr>
+        <tr><td class="k">👀 人目</td><td>来客・職場・写真に写る？</td><td>玄関のニオイは、住んでる人だけ気づかない</td></tr>
+        <tr><td class="k">🚪 不可逆</td><td>傷む・カビる・歪む・今しかない</td><td>ニットは一度伸びたら戻らない</td></tr>
+      </table>
+    </div>
+
+    <div class="head"><h2>1行目のストック</h2><span>30 OPENERS</span></div>
+    <p class="note">タップでコピー。<code>◯◯</code>は「作る」タブの困り事が入ります。</p>
+    <div class="rows" id="hookList"></div>
+
+    <div class="head"><h2>投稿前のチェック</h2><span>CHECKLIST</span></div>
+    <div class="card">
+      <ul style="margin:0;padding-left:18px;font-size:13px;line-height:2">
+        <li>1行目に<b>商品名が入っていない</b>（入れるのは困り事）</li>
+        <li>放置の結果が<b>数字か情景</b>になっている</li>
+        <li>効果を<b>断定していない</b>（治る・効く・改善・絶対・No.1）</li>
+        <li>使っていない商品に「使ってます」と書いていない</li>
+        <li>使い方の動作が<b>1つだけ</b>（貼る／置く／入れる）</li>
+        <li>今買う理由が1行ある</li>
+        <li>タグに<b>悩みワード</b>が入っている（商品名だけにしない）</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ========== 例文 ========== -->
+  <section id="p-ex" role="tabpanel" aria-labelledby="tab-ex" class="stack" hidden>
+    <div class="head"><h2>そのまま使える20本</h2><span>2026 AUTUMN → WINTER</span></div>
+    <p class="note">数字と体験は<b>自分の事実に差し替えてから</b>投稿してください。商品名は各自のリンクに合わせて。</p>
+    <div id="exList"></div>
+  </section>
+
+  <!-- ========== 戦略 ========== -->
+  <section id="p-plan" role="tabpanel" aria-labelledby="tab-plan" class="stack" hidden>
+    <div class="head"><h2>どこで報酬が決まるか</h2><span>ECONOMICS</span></div>
+    <div class="scroll">
+      <table>
+        <tr><th>要素</th><th>率</th></tr>
+        <tr><td>通常報酬（ジャンル別）</td><td class="k">2〜4%</td></tr>
+        <tr><td>ROOMランクボーナス</td><td class="k">+最大3%</td></tr>
+        <tr><td>料率アップ商品（ショップ設定）</td><td class="k">最大20%・上限なし</td></tr>
+      </table>
+    </div>
+    <div class="card lift">
+      <p class="note" style="color:var(--ink);font-family:var(--serif);font-size:14.5px">
+        3%の商品を100個売るより、20%の商品を15個売るほうが速い。<br>ジャンル選びより先に「料率」を見る。</p>
+    </div>
+
+    <div class="head"><h2>商品選定の3条件</h2><span>FILTER</span></div>
+    <div class="card">
+      <p style="margin:0 0 6px;font-size:13.5px;font-weight:700">A｜解決型であること</p>
+      <p class="note">判定の問いはひとつ。<b>「これを買わないと、来週どんな小さな損をする？」に一言で答えられるか。</b>答えられない商品は投稿しない。ここがいちばん硬いフィルタです。</p>
+    </div>
+    <div class="card">
+      <p style="margin:0 0 6px;font-size:13.5px;font-weight:700">B｜すでにROOMでコレされていること</p>
+      <p class="note">コレ数が多い＝ROOM内で露出しやすく、実売の証拠もある。ただし超定番は埋もれます。狙い目は<b>コレ数が数百〜数千台で伸びている最中</b>のもの、または<b>コレ数は中くらいなのにレビューが多く★4以上</b>のもの。</p>
+    </div>
+    <div class="card">
+      <p style="margin:0 0 6px;font-size:13.5px;font-weight:700">C｜価格と料率のバランス</p>
+      <p class="note">月1万円までは<b>1,000〜5,000円の消耗品・日用品</b>で回転数を稼ぐ。そのうえで料率アップ商品を月10本だけ混ぜる。高額家電は単発では当たるが安定しないので軸にしない。</p>
+    </div>
+
+    <div class="head"><h2>週1・30分のリサーチ</h2><span>ROUTINE</span></div>
+    <ol class="steps">
+      <li><a href="https://room.rakuten.co.jp/discover/collectItemRank" target="_blank" rel="noopener">ROOMコレ数ランキング</a>を上から50件。「解決型」だけメモ（目安10件）</li>
+      <li>楽天市場側で<b>料率とレビュー数・★</b>を確認。料率3%以下かつレビュー100件未満は捨てる</li>
+      <li>残りに「放置したらどうなる？」を1行書く。<b>書けないものは捨てる</b></li>
+      <li>残ったものが今週の投稿候補（5〜8件で十分）</li>
+      <li><a href="https://affiliate.rakuten.co.jp/recommend/uplist/" target="_blank" rel="noopener">料率アップショップ</a>から、季節の困り事に当たるものを2件だけ拾う</li>
+    </ol>
+    <div class="card">
+      <p style="margin:0 0 6px;font-size:12px;font-family:var(--mono);letter-spacing:.06em;color:var(--faint)">1日の配分（3〜5投稿）</p>
+      <p class="note">解決型（本命・力を入れて書く）2件 ／ コレ数上位の定番（露出稼ぎ）2件 ／ 料率アップ商品（利益）1件</p>
+    </div>
+
+    <div class="head"><h2>直し方は2つだけ</h2><span>IMPROVE</span></div>
+    <div class="card">
+      <p class="note"><b>クリックが少ない</b> → 商品選定と1行目が悪い。型を替えて再投稿。<br>
+      <b>クリックは多いが売れない</b> → 実害の描写（2〜3行目）が弱い。数字を入れる。</p>
+    </div>
+
+    <div class="head"><h2>越えてはいけない線</h2><span>COMPLIANCE</span></div>
+    <p class="note">「放置したらどうなるか」を書く手法は、やりすぎると誇大表現として規約違反になります。アカウント停止に直結するので、言い換えを習慣にしてください。</p>
+    <div class="swap">
+      <div class="hd"><span>使わない</span><span>こう書く</span></div>
+      <div><span>花粉症が治る</span><span>朝の掃除が1回で終わるようになった</span></div>
+      <div><span>効果絶大</span><span>うちでは3週間ニオイが戻っていない</span></div>
+      <div><span>No.1の吸水力</span><span>レビュー◯件で★4.6（2026年◯月時点）</span></div>
+      <div><span>絶対買うべき</span><span>買い直したのはこれだけ</span></div>
+      <div><span>冷え性が改善する</span><span>足先が冷たくて眠れない夜が減った（個人の感想）</span></div>
+    </div>
+    <p class="note">ほかに禁止：自己購入による報酬取得（セルフアフィリエイト）、根拠のない「限定」「ここだけ」、使っていない商品の体験談。</p>
+
+    <div class="head"><h2>2026年後半カレンダー</h2><span>TIMING</span></div>
+    <div class="scroll">
+      <table>
+        <tr><th>時期</th><th>イベント</th><th>仕込むテーマ</th></tr>
+        <tr><td class="k">毎月5・0の日</td><td>ポイント倍率アップ</td><td>最も売れやすい。前夜に投稿を寄せる</td></tr>
+        <tr><td class="k">10/4→10/9</td><td>お買い物マラソン</td><td>衣替え・防寒の入り口・加湿</td></tr>
+        <tr><td class="k">11/4→11/11</td><td>お買い物マラソン</td><td>結露・暖房・電気代</td></tr>
+        <tr><td class="k">11/18→11/23</td><td>ブラックフライデー</td><td>家電・高単価。料率アップの勝負どころ</td></tr>
+        <tr><td class="k">12/4→12/11</td><td>スーパーSALE</td><td>大掃除・年末の来客準備</td></tr>
+        <tr><td class="k">12/19→12/26</td><td>大感謝祭</td><td>ふるさと納税の駆け込み・正月準備</td></tr>
+      </table>
+    </div>
+    <p class="note">日程は例年の傾向にもとづく予想を含みます。開催前に公式で確認してください。</p>
+  </section>
+
+  <div class="foot">
+    参照：ROOMコレ数ランキング／楽天市場 売れ筋ランキング／楽天アフィリエイト 料率アップショップ・ガイドライン／ROOM投稿のガイドライン。<br>
+    報酬率・セール日程は変動します。投稿前に公式の最新情報を確認してください。
+  </div>
+</div>
+<div class="toast" id="toast">コピーしました</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+/* ---------- toast ---------- */
+let tT;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('on'),1400); }
+async function copy(text,msg){
+  try{ await navigator.clipboard.writeText(text); toast(msg||'コピーしました'); }
+  catch(e){
+    const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed';
+    ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); toast(msg||'コピーしました'); }
+    catch(_){ toast('コピーできませんでした。長押しで選択してください'); }
+    ta.remove();
+  }
+}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(o=>{
+      const on = o===t;
+      o.setAttribute('aria-selected', on?'true':'false');
+      $('#'+o.getAttribute('aria-controls')).hidden = !on;
+    });
+    window.scrollTo({top:0,behavior:'instant'});
+  });
+});
+
+/* ---------- 1行目ストック ---------- */
+const HOOKS = [
+  ['名指し','◯◯、今週も見なかったことにした人へ。'],
+  ['名指し','これ、共働きの家だと絶対に起きます。'],
+  ['名指し','賃貸の狭い洗面所、ここが限界だと思ってました。'],
+  ['名指し','小学生の子がいる家の玄関、だいたいこうなる。'],
+  ['名指し','一人暮らし3年目で、やっと原因がわかった。'],
+  ['問いかけ','◯◯、いつから放置してます？'],
+  ['問いかけ','毎朝これに何分使ってるか、数えたことあります？'],
+  ['問いかけ','来客の5分前に焦るの、そろそろやめません？'],
+  ['問いかけ','それ、掃除じゃなくて「予防」で消えるって知ってました？'],
+  ['問いかけ','洗ってるのに臭う日、ありません？'],
+  ['告白','買い直したのは、結局これだけでした。'],
+  ['告白','3年迷って買って、もっと早く買えばよかった枠。'],
+  ['告白','正直、効果ないと思ってました。'],
+  ['告白','これに変えてから、あの家事が消えました。'],
+  ['告白','去年サボって、今年の冬に請求が来ました。'],
+  ['数字','1日5分の◯◯は、1年で30時間です。'],
+  ['数字','500円をケチって、◯万円の修理になった話。'],
+  ['数字','電気代、去年の同じ月と比べたら◯円違いました。'],
+  ['数字','3か月、まだ1回も掃除してません。'],
+  ['数字','買い替え3回目でようやく正解に着いた。'],
+  ['逆説','掃除グッズを増やすと、掃除は減りません。'],
+  ['逆説','収納を買う前に、これを1個。'],
+  ['逆説','高い洗剤より、先にこっちでした。'],
+  ['逆説','便利グッズはだいたい邪魔になる。これ以外は。'],
+  ['逆説','安いほうを買って、結局2回買いました。'],
+  ['締切','寒くなってから買うと、だいたい売り切れてます。'],
+  ['締切','結露が出てからでは、もう遅い場所があります。'],
+  ['締切','衣替えの前日に後悔するやつ。'],
+  ['締切','大掃除の日に泣かないための、9月の1個。'],
+  ['締切','ふるさと納税、12月31日に慌てる人へ。']
+];
+(function buildHooks(){
+  const box=$('#hookList'); let last=null; let n=0;
+  HOOKS.forEach(([g,h])=>{
+    if(g!==last){ const d=document.createElement('div'); d.className='grp'; d.textContent=g+'系';
+      box.appendChild(d); last=g; }
+    n++;
+    const r=document.createElement('div'); r.className='row';
+    r.innerHTML='<span class="n">'+String(n).padStart(2,'0')+'</span><p>'+esc(h)+'</p>';
+    const b=document.createElement('button'); b.className='btn-mini'; b.type='button'; b.textContent='使う';
+    b.addEventListener('click',()=>{ $('#f-hook').value=fill(h); render();
+      document.querySelector('.tab').click(); toast('1行目に入れました'); });
+    r.appendChild(b); box.appendChild(r);
+  });
+})();
+function fill(h){ const p=$('#f-pain').value.trim(); return p ? h.replace(/◯◯/g,p) : h; }
+
+/* ---------- 例文 ---------- */
+const EX = [
+ ['🍂 9〜10月｜衣替え・湿気',[
+  ['衣類圧縮袋・収納ケース','衣替えの前日に後悔するやつ。\n\nクローゼットに入りきらない冬物を、とりあえず紙袋に。\nあれ、来年の秋に開けると型崩れとニオイでほぼ着られません。\nニットは一度伸びたら戻らない。\n\nこれは掃除機なしで、巻いて空気を抜くだけ。\n去年これに替えて、春に出したセーターがそのまま着られました。\n\n10月のマラソン中にまとめ買いしておく枠です。\n\n#衣替え #衣類収納 #圧縮袋 #クローゼット収納 #狭い賃貸 #楽天ROOM'],
+  ['防虫剤・防カビ剤','去年サボって、今年の秋に1着ダメにしました。\n\n防虫剤って「入れたつもり」がいちばん危ない。\n半年で効果が切れるのに、入れ替えた日を誰も覚えていない。\n気づくのは、袖に穴が空いてからです。\n\nこれは交換サインが色で出るタイプ。\n考えなくていいのがいちばん強い。\n\n#防虫剤 #衣替え #クローゼット #ウール #楽天ROOM #買ってよかった'],
+  ['除湿シート・布団乾燥','マットレスの裏、最後に見たのいつですか？\n\n夏に吸った汗はまだ抜けていません。\n秋に部屋の温度が下がると、そこで初めてカビが出る。\nマットレスは洗えないので、出たら買い替えです。\n\n敷いて、湿ったら干すだけ。\nうちは3年目のマットレスがまだ無事です。\n\n#除湿シート #ベッド下 #カビ対策 #寝具 #一人暮らし #楽天ROOM'],
+  ['玄関の消臭・靴用乾燥','玄関のニオイは、住んでる人だけ気づきません。\n\n秋は雨と汗が重なる、実は一年でいちばん玄関がこもる時期。\n宅配の人が一歩下がるの、あれ気のせいじゃないです。\n\n靴に入れて置いておくだけ。\n来客の予定がある月は、先に仕込んでおくと安心。\n\n#玄関 #消臭 #靴 #来客準備 #気づかないニオイ #楽天ROOM'],
+  ['排水口・パイプ用品','排水口のヌメリ、今週も見なかったことにした人へ。\n\n放置すると、年末の大掃除でハイターと格闘する2時間がそのまま予約されます。\nしかも冬のほうがニオイは上がってくる。気づくのはたいてい来客の5分前。\n\nこれは月1で置くだけ。ゴミ受けの上にポンと入れて、あとは忘れていい。\nうちは3か月続けて、あの掃除を1回もしていません。\n\n#排水口 #ヌメリ取り #大掃除しない暮らし #時短家事 #キッチン #楽天ROOM']
+ ]],
+ ['❄️ 11月｜防寒・電気代・結露',[
+  ['足元ヒーター','寒くなってから買うと、だいたい売り切れてます。\n\n去年の11月、足元ヒーターを探して3店舗ハシゴして、結局あきらめました。\nで、1月の電気代を見て後悔した。暖房を強くしていた分です。\n\n先に足元だけ温めるほうが、部屋ごと温めるより安い。\nデスクの下に置いて、スイッチ1つ。\n\nブラックフライデーで確保しておくやつです。\n\n#足元ヒーター #電気代節約 #冷え対策 #在宅ワーク #冬支度 #楽天ROOM'],
+  ['結露防止テープ・断熱シート','結露が出てからでは、もう遅い場所があります。\n\n窓のサッシの下、去年ふいてましたよね。\nあれ、ふき取っても水はゴムパッキンの内側に残ります。\n黒くなったパッキンは洗っても戻らないし、賃貸だと退去時に言われることがある。\n\n貼るのは10月〜11月。出る前に貼る。\n1本で窓2枚分、作業は15分。\n\n#結露対策 #窓 #断熱 #賃貸 #カビ対策 #冬支度 #楽天ROOM'],
+  ['着る毛布・ルームウェア','暖房を1度下げられるかどうか、ここで決まります。\n\n「寒いから暖房を上げる」を12月〜3月で毎日やると、\n差額は月に数百円〜千円台。4か月分をまとめて見ると、この1枚より高い。\n\n袖があって、家事ができる丈のものを選ぶのがコツ。\n床まであるタイプは結局脱ぎます。\n\n#着る毛布 #ルームウェア #電気代節約 #冷え性 #冬支度 #楽天ROOM'],
+  ['加湿器','喉が痛い朝、原因は風邪じゃなくて湿度かもしれません。\n\n冬の暖房部屋、放っておくと湿度30%台まで落ちます。\n30%台の部屋で寝ると、朝起きたとき喉がカラカラになる。\nこれが毎晩続く3か月を、何もせず過ごすかどうかの話です。\n\n寝室に置いて、水を入れるだけ。\nお手入れが面倒にならない、パーツが少ないものを選ぶのが正解でした。\n\n#加湿器 #乾燥対策 #寝室 #冬支度 #湿度 #楽天ROOM'],
+  ['電気毛布・湯たんぽ','「布団に入っても足が冷たくて眠れない」が、いちばん体力を削ります。\n\n眠りが浅い日が続くと、翌日の集中が落ちて、やることが終わらず、寝る時間がさらに遅くなる。\n冬の不調の入り口は、だいたい足先です。\n\n寝る30分前にスイッチを入れて、入るときに切る。\n電気代は1晩あたり数円です。\n\n#電気毛布 #湯たんぽ #冷え対策 #睡眠 #冬支度 #楽天ROOM']
+ ]],
+ ['🧹 12月｜大掃除・来客・年末',[
+  ['換気扇フィルター','大掃除の日に泣かないための、今日の1個。\n\n換気扇を1年放置すると、油は固まって「洗剤で落ちない層」になります。\nそうなると年末に1時間半、脚立の上で格闘することが確定する。\n30分で終わる家と、半日かかる家の差はここだけです。\n\n貼って、3か月で剥がして捨てる。洗いません。\n\n#換気扇 #大掃除 #キッチン掃除 #時短家事 #貼るだけ #楽天ROOM'],
+  ['レンジフード・油汚れクリーナー','年末にまとめてやるから、大掃除は嫌いになります。\n\n1年分の油は、洗剤の問題ではなく「時間」の問題。\n12月にやると、こすっても落ちなくて、最終的にあきらめて見なかったことにする。\n\nこれは吹いて5分置いて拭くだけ。\n11月のうちに1回やっておくと、12月が別物になります。\n\n#大掃除 #キッチン掃除 #油汚れ #年末 #前倒し家事 #楽天ROOM'],
+  ['来客用スリッパ','来客の5分前に焦るの、そろそろやめません？\n\n年末年始、実家でも自宅でも「スリッパが足りない」は必ず起きます。\nそのとき出てくるのが、何年か前の、かかとがつぶれたやつ。\n見られてます。\n\n5足セットで、洗えるものを1箱。\n年に1回しか使わないので、収納できる薄さかどうかで選ぶ。\n\n#来客準備 #スリッパ #年末年始 #帰省 #おもてなし #楽天ROOM'],
+  ['ふるさと納税','12月31日に慌てる人へ。\n\nふるさと納税は「12月にやる」ものではなく「12月までに終わらせる」ものです。\n月末は人気の返礼品から在庫が消えて、結局あまり欲しくないものを選ぶことになる。\nしかも申請書の期限は年明けすぐ。ここで毎年、控除を取り逃がす人がいます。\n\n今月のうちに、まず米と肉だけ決める。\n残りは12月に回していい。\n\n#ふるさと納税 #年末 #節税 #駆け込み #楽天ROOM'],
+  ['解氷スプレー・フロントカバー','出発が毎朝10分遅れる冬が、来月から始まります。\n\n凍ったフロントガラスにお湯をかけると、ガラスは割れます。\nかといってワイパーで無理にやるとゴムが裂ける。\n結局、車内で暖房をかけて待つ10分 × 出勤日60日 = 10時間です。\n\n前夜にカバーをかけるか、朝に吹きかけるか。どっちでもいい、何かやる。\n\n#冬支度 #車 #凍結対策 #通勤 #朝時間 #楽天ROOM']
+ ]],
+ ['🔁 通年｜いつ出しても売れる',[
+  ['充電ケーブル','安いほうを買って、結局2回買いました。\n\n充電ケーブルは、切れるときに必ず「出先で」切れます。\nモバイルバッテリーがあっても、つなぐものがなければただの重りです。\n1本500円を2回買うより、最初から1本。\n\nL字タイプにすると、寝ながら使っても根本が折れません。\n\n#充電ケーブル #断線防止 #スマホ #買い直さない #楽天ROOM'],
+  ['洗濯槽クリーナー','洗濯物、部屋干しの日だけ臭いません？\n\nそれ、干し方じゃなくて洗濯槽のほうかもしれません。\n半年放置すると、洗うたびに黒いカスが服につく段階に入ります。\nそこまで行くと、クリーナー1回では戻らない。\n\nつけ置き1回で、次の部屋干しからニオイが気にならなくなりました。\n雨が続く前に1箱。\n\n#部屋干し #生乾き臭 #洗濯槽クリーナー #洗濯 #楽天ROOM'],
+  ['収納・配線まとめ','収納を買う前に、これを1個。\n\n探し物にかかる時間は1日5分と言われます。1年で30時間。\n毎回「どこだっけ」と言いながら引き出しを開けているのは、\n物が多いからではなく、定位置がないからです。\n\nこれは置くだけで定位置ができるタイプ。\n増やすのではなく、決めるための道具です。\n\n#収納 #片付け #配線収納 #定位置 #探し物 #楽天ROOM'],
+  ['ハンドクリーム','水仕事のあと、手を見るのが嫌になる季節です。\n\n一度ガサガサになると、そこから2〜3週間は元に戻りません。\n仕事で人に書類を渡すたびに気になるし、ニットも引っかかる。\nひび割れてから塗り始めるのが、いちばん時間がかかるやり方です。\n\n寝る前に1回。荒れる前から使うためのものです。\n（※感じ方には個人差があります）\n\n#ハンドクリーム #手荒れ対策 #水仕事 #冬の乾燥 #楽天ROOM'],
+  ['食洗機・時短家電','1日20分の皿洗いは、1年で120時間です。\n\nこれは「ラクをする」話ではなくて、\nその120時間を何に使っていたか思い出せますか、という話。\nたいてい、夜のいちばん疲れている時間帯に消えています。\n\n分岐水栓が要らないタンク式なら、賃貸でも置けます。\nブラックフライデーが年内でいちばん安くなる枠。\n\n#食洗機 #時短家電 #共働き #家事削減 #賃貸OK #楽天ROOM']
+ ]]
+];
+(function buildEx(){
+  const box=$('#exList');
+  EX.forEach(([season,items])=>{
+    const h=document.createElement('div'); h.className='grp';
+    h.style.cssText='border:none;padding:14px 2px 4px';
+    h.textContent=season; box.appendChild(h);
+    items.forEach(([name,body])=>{
+      const d=document.createElement('details');
+      const s=document.createElement('summary'); s.textContent=name; d.appendChild(s);
+      const w=document.createElement('div'); w.className='ex';
+      const lines=body.split('\n');
+      w.innerHTML='<pre><span class="fl">'+esc(lines[0])+'</span>'+esc(lines.slice(1).join('\n'))+'</pre>';
+      const b=document.createElement('button'); b.className='btn'; b.type='button';
+      b.textContent='この文をコピー'; b.style.width='100%';
+      b.addEventListener('click',()=>copy(body));
+      w.appendChild(b); d.appendChild(w); box.appendChild(d);
+    });
+  });
+})();
+
+/* ---------- 規約チェッカー ---------- */
+const NG = [
+  {w:['治る','治す','完治','症状が','炎症','アレルギーが','花粉症が治','菌を殺','殺菌し','除菌率','デトックス','免疫力','血行が良く','痩せる','やせる','脂肪が燃焼','若返','シワが消え','シミが消え','育毛','発毛'],lv:'ng',why:'薬機法：医薬品的な効果効能の表現'},
+  {w:['効く','効果があります','効果は絶大','効果絶大','改善します','改善する','予防できます','予防する','治療'],lv:'ng',why:'薬機法：効果の断定・予防効果の標榜'},
+  {w:['No.1','NO.1','ナンバーワン','日本一','世界一','業界一','最高峰','最強','唯一'],lv:'ng',why:'景表法：根拠のない最上級表現'},
+  {w:['絶対','必ず','確実に','100%','誰でも','間違いなく'],lv:'ng',why:'景表法：断定・保証にあたる表現'},
+  {w:['ここだけ','非公開','秘密の','裏技','今だけ','限定'],lv:'cau',why:'根拠がなければ不当表示。事実なら期間や条件を明記'},
+  {w:['完全','永久','即効','劇的','驚異'],lv:'cau',why:'誇大表現とみなされやすい語'}
+];
+function scanText(t){
+  const hits=[];
+  NG.forEach(g=>g.w.forEach(w=>{ if(t.includes(w)) hits.push({w,lv:g.lv,why:g.why}); }));
+  return hits;
+}
+function markup(t,hits){
+  let html=esc(t);
+  const sorted=[...hits].sort((a,b)=>b.w.length-a.w.length);
+  sorted.forEach(h=>{
+    const e=esc(h.w).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    html=html.replace(new RegExp('(?![^<]*>)'+e,'g'),'<mark class="'+(h.lv==='ng'?'ng':'cau')+'">'+esc(h.w)+'</mark>');
+  });
+  return html;
+}
+function renderCheck(hits){
+  const dot=$('#checkDot'), title=$('#checkTitle'), list=$('#checkList');
+  if(!hits.length){
+    dot.className='dot'; title.textContent='規約チェック：問題なし';
+    list.innerHTML='<li>薬機法・景表法に触れやすい語は見つかりませんでした。</li>'; return;
+  }
+  const bad=hits.some(h=>h.lv==='ng');
+  dot.className='dot '+(bad?'bad':'mid');
+  title.textContent= bad ? '規約チェック：直したほうがいい語が '+hits.length+' 件'
+                         : '規約チェック：注意したい語が '+hits.length+' 件';
+  const seen=new Set();
+  list.innerHTML = hits.filter(h=>!seen.has(h.w)&&seen.add(h.w))
+    .map(h=>'<li><b>「'+esc(h.w)+'」</b>／'+esc(h.why)+'</li>').join('');
+}
+
+/* ---------- 生成 ---------- */
+const KIND = {money:'💰',time:'⏳',eyes:'👀',gone:'🚪'};
+let kata='A';
+$('#kataSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-k]'); if(!b) return;
+  kata=b.dataset.k;
+  document.querySelectorAll('#kataSeg button').forEach(o=>o.setAttribute('aria-pressed',o===b?'true':'false'));
+  render();
+});
+
+function v(id){ return $(id).value.trim(); }
+function tags(){
+  const raw=v('#f-tag'); if(!raw) return '#楽天ROOM';
+  return raw.split(/[\s,、　]+/).filter(Boolean)
+    .map(t=>t.startsWith('#')?t:'#'+t).join(' ');
+}
+function autoHook(){
+  const pain=v('#f-pain'), who=v('#f-who');
+  if(!pain && !who) return '';
+  if(kata==='B') return pain ? pain+'、気になってません？' : who+'に、これ起きてません？';
+  if(kata==='C') return pain ? pain+'、あとからでは間に合わない場所があります。' : '寒くなってから買うと、だいたい売り切れてます。';
+  if(pain) return pain+'、今週も見なかったことにした人へ。';
+  return 'これ、'+who+'だと毎年起きます。';
+}
+function build(){
+  const hook = v('#f-hook') || autoHook();
+  const d1=v('#f-d1'), d2=v('#f-d2'), act=v('#f-act'), exp=v('#f-exp'), now=v('#f-now');
+  const k1=KIND[$('#f-d1k').value], k2=KIND[$('#f-d2k').value];
+  const P=[];
+  if(!hook && !d1 && !d2 && !act && !exp) return '';
+  P.push(hook||'（1行目をここに）');
+
+  if(kata==='B'){
+    const body=[];
+    if(d1) body.push('それ、'+d1);
+    if(d2) body.push(d2);
+    if(body.length) P.push(body.join('\n'));
+    if(act) P.push(act+'。');
+    if(exp) P.push(exp+'。');
+    if(now) P.push(now);
+  } else if(kata==='C'){
+    const body=[];
+    if(d1) body.push(k1+' 放置すると、'+d1+'。');
+    if(d2) body.push(k2+' そして'+d2+'。');
+    if(body.length) P.push(body.join('\n'));
+    if(act) P.push(act+'。それだけで終わります。');
+    if(exp) P.push(exp+'。');
+    P.push(now || '売り切れる前に確保しておく枠です。');
+  } else {
+    const body=[];
+    if(d1) body.push('放置すると、'+d1+'。');
+    if(d2) body.push('しかも'+d2+'。');
+    if(body.length) P.push(body.join('\n'));
+    if(act) P.push('これは、'+act+'。\nあとは忘れていい。');
+    if(exp) P.push(exp+'。');
+    if(now) P.push(now);
+  }
+  P.push(tags());
+  return P.join('\n\n');
+}
+function render(){
+  const t=build();
+  const hits=scanText(t);
+  const lines=t.split('\n');
+  const rest=lines.slice(1).join('\n');
+  $('#outText').innerHTML = t
+    ? '<span class="fl">'+markup(lines[0],hits)+'</span>'+markup(rest,hits)
+    : '<span style="color:var(--faint);font-size:13px">上のフォームを埋めると、ここに投稿文ができます。</span>';
+  const chars=t.replace(/\n/g,'').length;
+  $('#counts').textContent = chars+'字 ／ '+(t?lines.filter(Boolean).length:0)+'行'
+    + (lines[0] ? '　1行目 '+lines[0].length+'字' : '');
+  renderCheck(hits);
+  save();
+}
+['#f-who','#f-pain','#f-hook','#f-d1','#f-d2','#f-act','#f-exp','#f-now','#f-tag','#f-d1k','#f-d2k']
+  .forEach(id=>$(id).addEventListener('input',render));
+
+$('#drawHook').addEventListener('click',()=>{
+  const h=HOOKS[Math.floor(Math.random()*HOOKS.length)][1];
+  $('#f-hook').value=fill(h); render();
+});
+$('#clearHook').addEventListener('click',()=>{ $('#f-hook').value=''; render(); });
+$('#copyOut').addEventListener('click',()=>{
+  const t=build();
+  if(!t){ toast('まだ何も入力されていません'); return; }
+  const risky=scanText(t).some(h=>h.lv==='ng');
+  copy(t, risky ? 'コピーしました。赤い語は直してから投稿を' : 'コピーしました');
+});
+$('#resetAll').addEventListener('click',()=>{
+  ['#f-who','#f-pain','#f-hook','#f-d1','#f-d2','#f-act','#f-exp','#f-now','#f-tag']
+    .forEach(id=>$(id).value='');
+  render(); toast('消しました');
+});
+
+/* ---------- 下書きの保持（この端末のみ） ---------- */
+const KEY='room-lab-draft-v1';
+function save(){
+  try{ const o={kata}; ['f-who','f-pain','f-hook','f-d1','f-d2','f-act','f-exp','f-now','f-tag','f-d1k','f-d2k']
+    .forEach(id=>o[id]=$('#'+id).value);
+    localStorage.setItem(KEY,JSON.stringify(o)); }catch(e){}
+}
+(function load(){
+  let o=null;
+  try{ o=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
+  if(o){
+    Object.keys(o).forEach(k=>{ const el=$('#'+k); if(el) el.value=o[k]; });
+    if(o.kata){ kata=o.kata;
+      document.querySelectorAll('#kataSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===kata?'true':'false')); }
+  }
+  render();
+})();
+</script>
