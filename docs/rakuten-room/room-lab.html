@@ -418,6 +418,46 @@ td.k{font-family:var(--mono);font-size:11px;color:var(--sub);white-space:nowrap;
 
   <!-- ========== 戦略 ========== -->
   <section id="p-plan" role="tabpanel" aria-labelledby="tab-plan" class="stack" hidden>
+    <div class="head"><h2>プロフィール設定</h2><span>1回だけ</span></div>
+    <p class="note">ROOMの設定画面に貼るだけ。<b>名前を変えてもフォロワーは消えません。</b></p>
+    <div class="card">
+      <p style="margin:0 0 4px;font-size:11px;font-family:var(--mono);letter-spacing:.06em;color:var(--faint)">ユーザー名</p>
+      <p style="margin:0 0 10px;font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:.08em">あさりえ</p>
+      <button class="btn" type="button" id="cpName" style="width:100%">名前をコピー</button>
+    </div>
+    <div class="card">
+      <p style="margin:0 0 8px;font-size:11px;font-family:var(--mono);letter-spacing:.06em;color:var(--faint)">自己紹介文</p>
+      <pre id="bioText" style="margin:0 0 12px;font-family:var(--sans);font-size:13.5px;line-height:1.95;white-space:pre-wrap">フルタイムで働く50代です。
+朝が、とにかく足りません。
+
+・5分早く家を出られたもの
+・帰宅後の「もう無理」が減ったもの
+・買い直さずに済んだもの
+
+この3つだけ載せています。
+値段ではなく「何分減ったか」で選びました。
+
+美容も、時間をかけない方法だけ。
+
+※実際に自分で使っているものだけを載せています。
+　迷って買わなかったものは載せません。
+
+まずは「朝」のコレクションからどうぞ。</pre>
+      <button class="btn" type="button" id="cpBio" style="width:100%">自己紹介文をコピー</button>
+    </div>
+    <div class="card">
+      <p style="margin:0 0 6px;font-size:13.5px;font-weight:700;color:var(--warn)">貼る前に1つだけ確認</p>
+      <p class="note">「実際に自分で使っているものだけ」は<b>事実のときだけ</b>残してください。使っていない商品も載せるなら、この2行は削ること（規約違反になります）。</p>
+    </div>
+
+    <div class="head"><h2>コレクションは3つ</h2><span>COLLECTIONS</span></div>
+    <p class="note">自己紹介の箇条書きと、コレクション名を<b>同じ言葉で揃えます</b>。読んだ人がそのまま迷わず飛べる状態にするため。</p>
+    <div class="rows">
+      <div class="row"><span class="n">01</span><p><b>朝</b><br><span style="font-size:11.5px;color:var(--faint)">5分早く家を出られたもの。自己紹介の締めで名指しする本命</span></p></div>
+      <div class="row"><span class="n">02</span><p><b>帰ってから</b><br><span style="font-size:11.5px;color:var(--faint)">「もう無理」が減ったもの。夜の時短・手抜きケア</span></p></div>
+      <div class="row"><span class="n">03</span><p><b>買い直さずに済んだ</b><br><span style="font-size:11.5px;color:var(--faint)">失敗しなかったもの。単価が上がってもここは強い</span></p></div>
+    </div>
+
     <div class="head"><h2>どこで報酬が決まるか</h2><span>ECONOMICS</span></div>
     <div class="scroll">
       <table>
@@ -711,6 +751,10 @@ const EX = [
     });
   });
 })();
+
+/* ---------- プロフィール ---------- */
+$('#cpName').addEventListener('click',()=>copy('あさりえ','名前をコピーしました'));
+$('#cpBio').addEventListener('click',()=>copy($('#bioText').textContent,'自己紹介文をコピーしました'));
 
 /* ---------- 商品スクリーナー ---------- */
 const CANDS = [
