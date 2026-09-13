@@ -16,6 +16,14 @@ const NEW_POST_URLS = process.env.NOTE_NEW_POST_URL
   : ['https://editor.note.com/new', 'https://note.com/notes/new'];
 const SHOT_DIR = path.join(__dirname, 'out');
 
+// タイトル欄の候補。エディタが開けたかの判定にも使う。
+const TITLE_SELECTORS = [
+  'textarea[placeholder*="記事タイトル"]',
+  'textarea[placeholder*="タイトル"]',
+  'input[placeholder*="タイトル"]',
+  '[data-testid="title-input"]',
+];
+
 const args = process.argv.slice(2);
 const file = args.find(a => !a.startsWith('--'));
 const publish = args.includes('--publish');
@@ -42,15 +50,27 @@ async function firstVisible(page, selectors, timeout = 20000) {
 }
 
 async function openEditor(page) {
-  let lastErr;
+  const tried = [];
   for (const url of NEW_POST_URLS) {
     try {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
-      if (!page.url().includes('/login')) return;
-      lastErr = new Error('ログイン画面にリダイレクトされました');
-    } catch (e) { lastErr = e; }
+      if (page.url().includes('/login')) {
+        tried.push(`${url} -> ログイン画面に飛ばされました（再ログインが必要です）`);
+        continue;
+      }
+      // 開いた先が本当にエディタかを、タイトル欄の有無で確かめる。
+      // ここを確認せずに進むと、別のページ上で操作しようとして分かりにくい失敗になる。
+      await firstVisible(page, TITLE_SELECTORS, 15000);
+      return;
+    } catch (e) {
+      tried.push(`${url} -> ${page.url()} （タイトル欄が見つからず）`);
+    }
   }
-  throw lastErr || new Error('エディタを開けませんでした');
+  throw new Error(
+    'エディタを開けませんでした。試したURL:\n  ' + tried.join('\n  ') +
+    '\n\n"npm run note:post" ではなく "node automation/note-inspect.js" を実行し、' +
+    '出力を共有してください（実際の画面構造を調べます）。'
+  );
 }
 
 async function main() {
@@ -69,12 +89,7 @@ async function main() {
   try {
     await openEditor(page);
 
-    const title = await firstVisible(page, [
-      'textarea[placeholder*="記事タイトル"]',
-      'textarea[placeholder*="タイトル"]',
-      'input[placeholder*="タイトル"]',
-      '[data-testid="title-input"]',
-    ]);
+    const title = await firstVisible(page, TITLE_SELECTORS);
     await title.click();
     await title.fill(article.title);
 

@@ -86,6 +86,21 @@ npm run note:post -- automation/articles/example.md --headed   # 動きを目で
 スクリーンショットが `automation/out/` に保存されるので、うまくいかないときは
 まず `--headed` で実行し、`out/` の画像で止まった画面を確認してください。
 
+## うまく動かないとき：画面構造を調べる
+
+note の画面の作りは予告なく変わります。`要素が見つかりません` で止まったら、
+次を実行すると、実際にどんな入力欄やボタンがあるかを一覧で表示します。
+
+```bash
+node automation/note-inspect.js
+```
+
+Windows の PowerShell では `node automation/note-inspect.js` のままで動きます
+（`npm` を経由しないため `.cmd` は不要）。
+
+出力された一覧をもとに、`automation/note-post.js` の `TITLE_SELECTORS` と
+`firstVisible()` に渡している候補を、実際の属性に合わせて追記してください。
+
 ## 注意
 
 - note の HTML 構造は予告なく変わります。要素が見つからないエラーが出たら
