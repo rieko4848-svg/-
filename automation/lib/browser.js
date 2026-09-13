@@ -12,20 +12,28 @@ function executablePath() {
   return p && fs.existsSync(p) ? p : undefined;
 }
 
-async function launch({ headless = true, slowMo = 0 } = {}) {
-  return chromium.launch({ headless, slowMo, executablePath: executablePath() });
+// maximized: 画面いっぱいに開く。画像認証など、下まで見えないと
+// 操作できないものがあるため、手で触る場面では必須。
+async function launch({ headless = true, slowMo = 0, maximized = false } = {}) {
+  return chromium.launch({
+    headless,
+    slowMo,
+    executablePath: executablePath(),
+    args: maximized && !headless ? ['--start-maximized'] : [],
+  });
 }
 
 function hasState() {
   return fs.existsSync(STATE_PATH);
 }
 
-async function newContext(browser, { useState = true } = {}) {
+async function newContext(browser, { useState = true, maximized = false } = {}) {
   return browser.newContext({
     storageState: useState && hasState() ? STATE_PATH : undefined,
     locale: 'ja-JP',
     timezoneId: 'Asia/Tokyo',
-    viewport: { width: 1280, height: 900 },
+    // viewport: null で「窓の実寸＝表示領域」になり、最大化が効く。
+    viewport: maximized ? null : { width: 1280, height: 900 },
   });
 }
 

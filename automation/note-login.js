@@ -53,6 +53,17 @@ async function captureState(page, name) {
   console.log(`画面の写真: ${shot}\n`);
 }
 
+// 画像認証は本人が通す必要がある。出ていることに気づけるようにする。
+async function captchaPresent(page) {
+  return page.evaluate(() => {
+    const text = document.body ? document.body.innerText : '';
+    if (/ロボットではありません|reCAPTCHA|hCaptcha|画像認証/i.test(text)) return true;
+    return !!document.querySelector(
+      'iframe[src*="recaptcha"], iframe[src*="hcaptcha"], iframe[title*="reCAPTCHA"], iframe[title*="captcha" i]'
+    );
+  }).catch(() => false);
+}
+
 // Google は自動操作ブラウザからのログインを拒否する。
 // 10分待たせず、その場で気づけるようにする。
 function externalAuthBlocked(currentUrl) {
@@ -71,8 +82,9 @@ function looksSettled(currentUrl) {
 }
 
 async function main() {
-  const browser = await launch({ headless, slowMo: 50 });
-  const context = await newContext(browser, { useState: false });
+  // 画像認証などを操作できるよう、画面いっぱいに開く。
+  const browser = await launch({ headless, slowMo: 50, maximized: !headless });
+  const context = await newContext(browser, { useState: false, maximized: !headless });
   const page = await context.newPage();
 
   await page.goto(LOGIN_URL, { waitUntil: 'domcontentloaded' });
@@ -98,6 +110,13 @@ async function main() {
     await page.waitForTimeout(3000);
 
     await captureState(page, 'login-after-submit');
+
+    if (await captchaPresent(page)) {
+      console.log('■ 画像認証（「私はロボットではありません」など）が出ています。');
+      console.log('  開いているブラウザの窓で、ご自身で認証を完了してください。');
+      console.log('  窓は最大化して開いています。見えない場合は下へスクロールしてください。');
+      console.log('  認証が終わると自動で先に進みます。\n');
+    }
 
     // 入力内容が違う場合、note は画面上にエラーを出す。気づけるよう拾っておく。
     const problem = await page.evaluate(() => {
@@ -126,6 +145,7 @@ async function main() {
   let ok = false;
   let notified = false;
   // どこで止まっているか分かるよう、今どの画面にいるかを知らせ続ける。
+  let lastProbe = 0;
   let lastShown = '';
   let lastShownAt = 0;
   const showWhere = () => {
@@ -150,7 +170,12 @@ async function main() {
         '  もう一度このコマンドを実行してください。'
       );
     }
-    if (looksSettled(page.url())) {
+    // 画面が note 側に落ち着いたときに確認する。
+    // ただし、認証後も /login のまま留まる場合があるため、
+    // 落ち着いて見えなくても15秒ごとに一度は確認する。
+    const now = Date.now();
+    if (looksSettled(page.url()) || now - lastProbe > 15000) {
+      lastProbe = now;
       if (!notified) { console.log('ログインを確認しています…'); notified = true; }
       if (await isLoggedIn(context)) { ok = true; break; }
       notified = false;   // まだだったので、次に戻ってきたら再度知らせる
