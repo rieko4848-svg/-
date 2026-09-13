@@ -23,6 +23,21 @@ function Has($name) {
   return [bool](Get-Command $name -ErrorAction SilentlyContinue)
 }
 
+# PowerShell の実行ポリシーに阻まれないよう、npm / npx は .cmd 版を使う
+function Invoke-Npm {
+  param([Parameter(ValueFromRemainingArguments = $true)]$Args)
+  $exe = if (Has 'npm.cmd') { 'npm.cmd' } else { 'npm' }
+  & $exe @Args
+  if ($LASTEXITCODE -ne 0) { throw "$exe $($Args -join ' ') が失敗しました (終了コード $LASTEXITCODE)" }
+}
+
+function Invoke-Npx {
+  param([Parameter(ValueFromRemainingArguments = $true)]$Args)
+  $exe = if (Has 'npx.cmd') { 'npx.cmd' } else { 'npx' }
+  & $exe @Args
+  if ($LASTEXITCODE -ne 0) { throw "$exe $($Args -join ' ') が失敗しました (終了コード $LASTEXITCODE)" }
+}
+
 function Ensure-Tool($cmd, $wingetId, $label, $manualUrl) {
   if (Has $cmd) { Ok "$label は導入済みです"; return }
 
@@ -62,22 +77,22 @@ Ok "ファイルを用意しました"
 
 # --- 依存パッケージとブラウザ ---
 Say "必要な部品を導入します（初回は数分かかります）"
-npm install
+Invoke-Npm install
 Ok "部品の導入が完了しました"
 
 Say "自動操作用のブラウザを導入します"
-npx playwright install chromium
+Invoke-Npx playwright install chromium
 Ok "ブラウザの導入が完了しました"
 
 # --- ログイン ---
 Say "note のログイン画面を開きます"
 Write-Host "   開いたブラウザで、ご自身で note にログインしてください。" -ForegroundColor White
 Write-Host "   （このスクリプトはパスワードを一切受け取りません）" -ForegroundColor White
-npm run note:login
+Invoke-Npm run note:login
 
 Pop-Location
 Write-Host "`n=== セットアップ完了 ===" -ForegroundColor Green
 Write-Host "作業フォルダ: $Dest"
 Write-Host "`n試しに下書き投稿するには、次の2行を順に実行してください:" -ForegroundColor White
 Write-Host "  cd `"$Dest`""
-Write-Host "  npm run note:post -- automation/articles/example.md --headed"
+Write-Host "  npm.cmd run note:post -- automation/articles/example.md --headed"

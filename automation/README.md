@@ -68,6 +68,21 @@ npm run note:post -- automation/articles/example.md --publish  # 公開
 npm run note:post -- automation/articles/example.md --headed   # 動きを目で見る
 ```
 
+> **Windows の場合**：PowerShell は初期設定でスクリプトの実行を禁止しているため、
+> `npm` と打つと `npm.ps1 を読み込むことができません` というエラーになります。
+> `npm.cmd` と打てばそのまま動きます。
+>
+> ```powershell
+> npm.cmd run note:post -- automation/articles/example.md --headed
+> ```
+>
+> 毎回 `.cmd` を付けたくない場合は、一度だけ次を実行すれば普通に `npm` と打てます
+> （管理者権限は不要、自分のユーザーのみが対象）。
+>
+> ```powershell
+> Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+> ```
+
 スクリーンショットが `automation/out/` に保存されるので、うまくいかないときは
 まず `--headed` で実行し、`out/` の画像で止まった画面を確認してください。
 
