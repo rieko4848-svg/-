@@ -29,8 +29,13 @@ npx playwright install chromium   # ブラウザ本体の取得（初回のみ�
 npm run note:login
 ```
 
-ブラウザが開くので、画面上で note にログインしてください。ログインが完了すると
-Cookie が `automation/.auth/note-state.json` に保存され、以降は再利用されます。
+ブラウザが開くので、画面上で note にログインしてください。
+
+ログインできたかどうかは、URL の変化ではなく**ログイン必須のページ (`/notes/new`) を
+開けるか**で判定します。確認が取れた場合だけ Cookie が
+`automation/.auth/note-state.json` に保存され、以降は再利用されます。
+確認できないまま10分経つと、何も保存せずエラーで終了します
+（`NOTE_LOGIN_TIMEOUT_MS` で待ち時間を変更できます）。
 
 メール＋パスワードを環境変数で渡して自動入力させることもできます（2段階認証や
 CAPTCHA が出た場合は画面で続きを操作してください）。

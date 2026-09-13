@@ -45,6 +45,19 @@ async function collectFields(page) {
   });
 }
 
+// URL だけでは判断を誤るため、ログアウト時にしか出ない導線も見る。
+async function loginStatus(page) {
+  if (page.url().includes('/login')) return 'ログアウト状態（要再ログイン）';
+  const guestOnly = await page.evaluate(() => {
+    const texts = [...document.querySelectorAll('button, a')]
+      .map(el => (el.innerText || '').trim());
+    return texts.some(t => t === '会員登録' || t === 'ログイン');
+  });
+  return guestOnly
+    ? 'ログアウト状態とみられる（「会員登録」「ログイン」が表示されています）'
+    : 'ログイン済み';
+}
+
 async function collectButtons(page) {
   return page.evaluate(() => {
     const out = [];
@@ -80,7 +93,7 @@ async function main() {
 
     console.log(`  最終的なURL : ${page.url()}`);
     console.log(`  ページ名    : ${await page.title()}`);
-    console.log(`  ログイン状態: ${page.url().includes('/login') ? 'ログアウト状態（要再ログイン）' : 'ログイン済みとみられる'}`);
+    console.log(`  ログイン状態: ${await loginStatus(page)}`);
 
     const fields = await collectFields(page);
     console.log(`\n  --- 入力できそうな部品 (${fields.length}件) ---`);
