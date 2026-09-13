@@ -107,6 +107,16 @@ Windows の PowerShell では `node automation/note-inspect.js` のままで動�
 出力された一覧をもとに、`automation/note-post.js` の `TITLE_SELECTORS` と
 `firstVisible()` に渡している候補を、実際の属性に合わせて追記してください。
 
+## ブラウザは画面ありで動きます
+
+note のエディタは起動時に `note.com` の API を呼びますが、画面なし（ヘッドレス）の
+ブラウザからの呼び出しは拒否され、エディタが描画されません
+（`blocked by CORS policy` として現れます）。画面なしのブラウザは名乗りに
+`HeadlessChrome` が含まれるためです。
+
+そのため各スクリプトは**画面ありで動くのが既定**です。動作確認などで画面なしに
+したい場合のみ `--headless` を付けてください。
+
 ## 注意
 
 - note の HTML 構造は予告なく変わります。要素が見つからないエラーが出たら

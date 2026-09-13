@@ -16,7 +16,8 @@ const CANDIDATES = process.env.NOTE_INSPECT_URLS
       'https://note.com/',
     ];
 
-const headless = !process.argv.includes('--headed');
+// note の API は画面なしのブラウザからの呼び出しを拒否するため、既定は画面あり。
+const headless = process.argv.includes('--headless');
 const trim = (s, n = 60) => (s || '').replace(/\s+/g, ' ').trim().slice(0, n);
 
 // 入力できそうな部品を洗い出して、見分けに使える属性を返す。
@@ -138,6 +139,15 @@ async function main() {
   page.on('response', (r) => {
     if (r.status() >= 400) note(`応答${r.status()}: ${r.url().slice(0, 120)}`);
   });
+
+  // サーバー側が「自動操作のブラウザ」と判断する材料になるため、名乗りを確認する。
+  const ua = await page.evaluate(() => navigator.userAgent).catch(() => '(取得できません)');
+  console.log(`ブラウザの名乗り: ${ua}`);
+  console.log(`画面表示: ${headless ? 'なし（ヘッドレス）' : 'あり'}`);
+  if (/Headless/i.test(ua)) {
+    console.log('※ 名乗りに "Headless" が含まれています。これが原因で API を拒否される場合があります。');
+    console.log('  --headed を付けて実行すると、通常のブラウザとして動きます。');
+  }
 
   for (const url of CANDIDATES) {
     console.log('\n============================================================');

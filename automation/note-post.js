@@ -27,7 +27,8 @@ const TITLE_SELECTORS = [
 const args = process.argv.slice(2);
 const file = args.find(a => !a.startsWith('--'));
 const publish = args.includes('--publish');
-const headless = !args.includes('--headed');
+// note の API は画面なしのブラウザからの呼び出しを拒否するため、既定は画面あり。
+const headless = args.includes('--headless');
 
 async function shot(page, name) {
   fs.mkdirSync(SHOT_DIR, { recursive: true });
