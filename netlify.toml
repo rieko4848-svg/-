@@ -1,3 +1,10 @@
 [build]
   publish = "."
   functions = "netlify/functions"
+
+[build.environment]
+  # Playwright is only needed for the local note-draft skill (installed
+  # separately by the user via `npx playwright install chromium`); skip its
+  # postinstall browser download here so it doesn't slow down/break the
+  # site's own `npm install` during Netlify builds.
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
