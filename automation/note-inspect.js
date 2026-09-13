@@ -126,9 +126,23 @@ async function main() {
   const context = await openBrowser({ headless, maximized: !headless });
   const page = await firstPage(context);
 
+  // 画面が組み上がらない原因はたいてい JS のエラーか通信の失敗なので、記録しておく。
+  let problems = [];
+  const note = (line) => { if (problems.length < 400) problems.push(line); };
+  page.on('pageerror', (e) => note(`JSエラー: ${String(e.message).slice(0, 200)}`));
+  page.on('console', (m) => { if (m.type() === 'error') note(`console: ${m.text().slice(0, 200)}`); });
+  page.on('requestfailed', (r) => {
+    const why = r.failure() ? r.failure().errorText : '不明';
+    note(`通信失敗: ${why} ${r.url().slice(0, 120)}`);
+  });
+  page.on('response', (r) => {
+    if (r.status() >= 400) note(`応答${r.status()}: ${r.url().slice(0, 120)}`);
+  });
+
   for (const url of CANDIDATES) {
     console.log('\n============================================================');
     console.log(`調査するURL: ${url}`);
+    problems = [];
     try {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
       // エディタは読み込みが重い。通信が落ち着くまで待ってから調べる。
@@ -189,6 +203,17 @@ async function main() {
     const buttons = await collectButtons(page);
     console.log(`\n  --- ボタン (${buttons.length}件) ---`);
     console.log('  ' + buttons.slice(0, 30).map(b => `「${trim(b.text, 20)}」`).join(' '));
+
+    if (problems.length) {
+      // 同じ内容が何度も出るので、重複はまとめる。
+      const seen = new Map();
+      for (const line of problems) seen.set(line, (seen.get(line) || 0) + 1);
+      const list = [...seen.entries()];
+      console.log(`\n  --- 画面の組み立て中に起きた問題 (${problems.length}件 / 種類 ${list.length}) ---`);
+      list.slice(0, 15).forEach(([line, n]) => console.log(`  ・${line}${n > 1 ? ` (×${n})` : ''}`));
+    } else {
+      console.log('\n  --- 画面の組み立て中に起きた問題: なし ---');
+    }
 
     const shot = path.join(SHOT_DIR, `inspect-${url.replace(/[^a-z0-9]+/gi, '_').slice(0, 40)}.png`);
     await page.screenshot({ path: shot, fullPage: false });
