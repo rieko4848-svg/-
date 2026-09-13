@@ -1,0 +1,7 @@
+node_modules/
+
+# note.com login session (Playwright storageState) — never commit auth data
+note-auth/
+**/note-auth/
+state.json
+note-draft-debug/
