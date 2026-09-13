@@ -20,8 +20,21 @@ const headless = !process.argv.includes('--headed');
 const trim = (s, n = 60) => (s || '').replace(/\s+/g, ' ').trim().slice(0, n);
 
 // 入力できそうな部品を洗い出して、見分けに使える属性を返す。
+// 枠(iframe)の中に入力欄がある作りのサイトもあるため、全部の枠を調べる。
 async function collectFields(page) {
-  return page.evaluate(() => {
+  const all = [];
+  for (const frame of page.frames()) {
+    try {
+      const found = await collectFieldsIn(frame);
+      const label = frame === page.mainFrame() ? '' : frame.url().slice(0, 60);
+      found.forEach(f => all.push(Object.assign({ frame: label }, f)));
+    } catch { /* 触れない枠は飛ばす */ }
+  }
+  return all;
+}
+
+async function collectFieldsIn(frame) {
+  return frame.evaluate(() => {
     const out = [];
     const nodes = document.querySelectorAll('textarea, input, [contenteditable="true"], [role="textbox"]');
     for (const el of nodes) {
@@ -59,7 +72,15 @@ async function loginStatus(page) {
 }
 
 async function collectButtons(page) {
-  return page.evaluate(() => {
+  const all = [];
+  for (const frame of page.frames()) {
+    try { (await collectButtonsIn(frame)).forEach(b => all.push(b)); } catch { /* 触れない枠は飛ばす */ }
+  }
+  return all;
+}
+
+async function collectButtonsIn(frame) {
+  return frame.evaluate(() => {
     const out = [];
     for (const el of document.querySelectorAll('button, a[role="button"], [role="button"]')) {
       const r = el.getBoundingClientRect();
@@ -84,7 +105,9 @@ async function main() {
     console.log(`調査するURL: ${url}`);
     try {
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
-      await page.waitForTimeout(5000);   // 画面が組み上がるのを待つ
+      // エディタは読み込みが重い。通信が落ち着くまで待ってから調べる。
+      await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
+      await page.waitForTimeout(8000);
     } catch (e) {
       console.log(`  開けませんでした: ${e.message}`);
       continue;
@@ -93,6 +116,13 @@ async function main() {
     console.log(`  最終的なURL : ${page.url()}`);
     console.log(`  ページ名    : ${await page.title()}`);
     console.log(`  ログイン状態: ${await loginStatus(page)}`);
+
+    const frames = page.frames();
+    console.log(`  枠(iframe)の数: ${frames.length}`);
+    frames.forEach((f, i) => { if (i > 0) console.log(`    枠${i}: ${f.url().slice(0, 90)}`); });
+
+    const bodyText = await page.evaluate(() => (document.body ? document.body.innerText : '').replace(/\s+/g, ' ').trim().slice(0, 200)).catch(() => '');
+    console.log(`  画面の文字: ${bodyText || '(空 ＝ まだ描画されていない可能性)'}`);
 
     const fields = await collectFields(page);
     console.log(`\n  --- 入力できそうな部品 (${fields.length}件) ---`);
@@ -106,6 +136,7 @@ async function main() {
         f.id && `id=${f.id}`,
         f.editable && `contenteditable=${f.editable}`,
         f.cls && `class="${trim(f.cls, 70)}"`,
+        f.frame && `【枠: ${trim(f.frame, 50)}】`,
       ].filter(Boolean).join(' ');
       console.log(`  [${i}] <${f.tag}> ${attrs}  (幅${f.w} 高${f.h} 上端${f.y})`);
     });
