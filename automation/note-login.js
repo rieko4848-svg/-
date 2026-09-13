@@ -72,7 +72,21 @@ async function main() {
   const deadline = Date.now() + WAIT_LIMIT_MS;
   let ok = false;
   let notified = false;
+  // どこで止まっているか分かるよう、今どの画面にいるかを知らせ続ける。
+  let lastShown = '';
+  let lastShownAt = 0;
+  const showWhere = () => {
+    const now = Date.now();
+    const url = page.url();
+    if (url === lastShown && now - lastShownAt < 30000) return;
+    lastShown = url;
+    lastShownAt = now;
+    const left = Math.ceil((deadline - now) / 60000);
+    console.log(`  [残り約${left}分] 今の画面: ${url.slice(0, 100)}`);
+  };
+
   while (Date.now() < deadline) {
+    showWhere();
     if (externalAuthBlocked(page.url())) {
       throw new Error(
         'Google が自動操作ブラウザからのログインを拒否しました（「ログインできませんでした」の画面）。\n' +
@@ -92,6 +106,7 @@ async function main() {
   }
 
   if (!ok) {
+    console.log(`\n時間切れです。最後にいた画面: ${page.url()}`);
     throw new Error(
       'ログインを確認できませんでした。\n' +
       '  ・ログインが完了しないまま時間切れになった\n' +
