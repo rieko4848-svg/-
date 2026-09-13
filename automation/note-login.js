@@ -31,6 +31,12 @@ async function isLoggedIn(context) {
   }
 }
 
+// Google は自動操作ブラウザからのログインを拒否する。
+// 10分待たせず、その場で気づけるようにする。
+function externalAuthBlocked(currentUrl) {
+  return /accounts\.google\.com\/.*\b(rejected|deniedsigninrejected)\b/.test(currentUrl);
+}
+
 // 認証の途中（外部サービスの画面など）で確認を走らせないための足切り。
 function looksSettled(currentUrl) {
   try {
@@ -67,6 +73,16 @@ async function main() {
   let ok = false;
   let notified = false;
   while (Date.now() < deadline) {
+    if (externalAuthBlocked(page.url())) {
+      throw new Error(
+        'Google が自動操作ブラウザからのログインを拒否しました（「ログインできませんでした」の画面）。\n' +
+        '  これは Google 側の仕様で、回避はできません。かわりに note の\n' +
+        '  メールアドレス＋パスワードでログインしてください。\n\n' +
+        '  パスワードを設定していない場合は、普段お使いのブラウザで\n' +
+        '  https://note.com/settings/account を開き、パスワードを設定してから\n' +
+        '  もう一度このコマンドを実行してください。'
+      );
+    }
     if (looksSettled(page.url())) {
       if (!notified) { console.log('ログインを確認しています…'); notified = true; }
       if (await isLoggedIn(context)) { ok = true; break; }

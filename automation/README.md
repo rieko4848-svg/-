@@ -44,6 +44,15 @@ CAPTCHA が出た場合は画面で続きを操作してください）。
 NOTE_EMAIL=you@example.com NOTE_PASSWORD=**** npm run note:login -- --auto
 ```
 
+### Google ログインは使えません
+
+Google は自動操作されたブラウザからのログインを拒否します
+（「ログインできませんでした / このブラウザまたはアプリは安全でない可能性があります」）。
+これは Google 側の仕様のため、**note のメールアドレス＋パスワードでログインしてください**。
+
+Google 連携でアカウントを作りパスワードが未設定の場合は、普段お使いのブラウザで
+https://note.com/settings/account を開き、パスワードを設定してから実行してください。
+
 > `automation/.auth/` は `.gitignore` 済みです。認証情報そのものなので、
 > 共有したりコミットしたりしないでください。
 
