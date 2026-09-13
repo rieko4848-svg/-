@@ -71,15 +71,16 @@ tags: [一人社長, 業務効率化]
 ```bash
 npm run note:post -- automation/articles/example.md            # 下書き保存
 npm run note:post -- automation/articles/example.md --publish  # 公開
-npm run note:post -- automation/articles/example.md --headed   # 動きを目で見る
 ```
+
+ブラウザの窓が開き、入力されていく様子が見えます（画面ありが既定）。
 
 > **Windows の場合**：PowerShell は初期設定でスクリプトの実行を禁止しているため、
 > `npm` と打つと `npm.ps1 を読み込むことができません` というエラーになります。
 > `npm.cmd` と打てばそのまま動きます。
 >
 > ```powershell
-> npm.cmd run note:post -- automation/articles/example.md --headed
+> npm.cmd run note:post -- automation/articles/example.md
 > ```
 >
 > 毎回 `.cmd` を付けたくない場合は、一度だけ次を実行すれば普通に `npm` と打てます
@@ -90,7 +91,7 @@ npm run note:post -- automation/articles/example.md --headed   # 動きを目で
 > ```
 
 スクリーンショットが `automation/out/` に保存されるので、うまくいかないときは
-まず `--headed` で実行し、`out/` の画像で止まった画面を確認してください。
+`out/` の画像で止まった画面を確認してください。
 
 ## うまく動かないとき：画面構造を調べる
 
