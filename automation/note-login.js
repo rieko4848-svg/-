@@ -63,8 +63,10 @@ async function main() {
   } else {
     // 既定はターミナルで入力してもらい、こちらが入力欄を埋める。
     // ブラウザ上で操作してもらうと Google のボタンを押してしまいやすいため。
-    const email = process.env.NOTE_EMAIL || await ask('note のメールアドレス: ');
-    const password = process.env.NOTE_PASSWORD || await ask('note のパスワード（入力しても表示されません）: ', { hidden: true });
+    console.log('note のメールアドレスとパスワードを入力してください。');
+    console.log('（パスワードは伏せ字 * で表示されます。保存はされません）\n');
+    const email = process.env.NOTE_EMAIL || await ask('メールアドレス: ');
+    const password = process.env.NOTE_PASSWORD || await ask('パスワード: ', { hidden: true });
     closePrompt();
     if (!email || !password) throw new Error('メールアドレスとパスワードの両方が必要です');
 
