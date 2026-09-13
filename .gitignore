@@ -1,0 +1,5 @@
+node_modules/
+automation/.auth/
+automation/out/
+.env
+.netlify/

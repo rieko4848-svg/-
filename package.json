@@ -4,5 +4,12 @@
   "private": true,
   "dependencies": {
     "@netlify/blobs": "^8.0.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  },
+  "scripts": {
+    "note:login": "node automation/note-login.js",
+    "note:post": "node automation/note-post.js"
   }
 }
