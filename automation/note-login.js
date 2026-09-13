@@ -6,6 +6,8 @@
 //   NOTE_EMAIL=... NOTE_PASSWORD=... node automation/note-login.js --auto
 //
 // --auto は2段階認証やCAPTCHAが出ると止まるので、その場合は画面で手動操作を続ける。
+const path = require('path');
+const fs = require('fs');
 const { launch, newContext, saveState } = require('./lib/browser');
 const { ask, closePrompt } = require('./lib/prompt');
 
@@ -30,6 +32,25 @@ async function isLoggedIn(context) {
   } finally {
     await probe.close().catch(() => {});
   }
+}
+
+const SHOT_DIR = path.join(__dirname, 'out');
+
+// 送信後の画面をそのまま記録する。推測せずに実物を見るため。
+async function captureState(page, name) {
+  fs.mkdirSync(SHOT_DIR, { recursive: true });
+  const shot = path.join(SHOT_DIR, `${name}.png`);
+  await page.screenshot({ path: shot, fullPage: false }).catch(() => {});
+
+  const text = await page.evaluate(() => {
+    const body = document.body ? document.body.innerText : '';
+    return body.replace(/\n{2,}/g, '\n').trim().slice(0, 600);
+  }).catch(() => '');
+
+  console.log(`\n--- 送信後の画面の内容 ---`);
+  console.log(text ? text.split('\n').map(l => '  ' + l).join('\n') : '  (文字を取得できませんでした)');
+  console.log(`--- ここまで ---`);
+  console.log(`画面の写真: ${shot}\n`);
 }
 
 // Google は自動操作ブラウザからのログインを拒否する。
@@ -76,18 +97,20 @@ async function main() {
     await page.click('button[type="submit"], button:has-text("ログイン")');
     await page.waitForTimeout(3000);
 
+    await captureState(page, 'login-after-submit');
+
     // 入力内容が違う場合、note は画面上にエラーを出す。気づけるよう拾っておく。
     const problem = await page.evaluate(() => {
       const hit = [...document.querySelectorAll('p, span, div')]
         .map(el => (el.innerText || '').trim())
-        .find(t => t && t.length < 120 && /正しくありません|一致しません|失敗|エラー|お確かめ/.test(t));
+        .find(t => t && t.length < 120 && /正しくありません|一致しません|失敗|エラー|お確かめ|見つかりません|登録されていません|認証/.test(t));
       return hit || '';
     }).catch(() => '');
     if (problem) {
       console.log(`  note からの表示: ${problem}`);
       // 認証情報そのものが違う場合は、待っても解決しないので即座に終える。
       // 2段階認証やCAPTCHAの案内は該当しないため、待機を続ける。
-      if (/正しくありません|一致しません|お確かめ/.test(problem)) {
+      if (/正しくありません|一致しません|お確かめ|見つかりません|登録されていません/.test(problem)) {
         throw new Error(
           `note がログインを受け付けませんでした（「${problem}」）。\n` +
           '  メールアドレスとパスワードをお確かめのうえ、もう一度実行してください。\n' +
