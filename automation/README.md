@@ -5,6 +5,19 @@ Playwright で note のエディタを操作し、Markdown ファイルを記事
 
 ## 準備（ローカル PC で実行）
 
+### Windows：一括セットアップ
+
+PowerShell に次の1行を貼り付けて Enter を押すと、Git / Node.js の導入から
+ファイルの取得、ログインまでを続けて行います。
+
+```powershell
+irm https://raw.githubusercontent.com/rieko4848-svg/-/claude/kind-babbage-r8s7p9/setup-windows.ps1 | iex
+```
+
+中身はリポジトリ直下の `setup-windows.ps1` です。実行前に内容を確認できます。
+
+### 手動で行う場合（Mac / Windows 共通）
+
 ```bash
 npm install
 npx playwright install chromium   # ブラウザ本体の取得（初回のみ）
