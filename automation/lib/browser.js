@@ -1,13 +1,11 @@
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { chromium } = require('playwright');
 
-const AUTH_DIR = path.join(__dirname, '..', '.auth');
-// 普通のブラウザと同じく、ログイン情報をこのフォルダに置いたまま使い回す。
-// 「ログインできたか」を判定して保存する必要がなくなる。
-const PROFILE_DIR = path.join(AUTH_DIR, 'profile');
-// ブラウザを閉じると消える種類の Cookie があるため、別途控えておいて復元する。
-const COOKIE_PATH = path.join(AUTH_DIR, 'note-cookies.json');
+// note-draft スキルと同じログイン記録を使う。ログインは1か所だけにする。
+const DEFAULT_STATE_PATH = path.join(os.homedir(), '.claude', 'note-auth', 'state.json');
+const STATE_PATH = process.env.NOTE_AUTH_STATE_PATH || DEFAULT_STATE_PATH;
 
 // Playwright 同梱版と別ビルドの Chromium しか無い環境向け。
 function executablePath() {
@@ -15,52 +13,30 @@ function executablePath() {
   return p && fs.existsSync(p) ? p : undefined;
 }
 
-// 一度でもログインしたことがあるか。
-function hasProfile() {
-  if (fs.existsSync(COOKIE_PATH)) return true;
-  try {
-    return fs.readdirSync(PROFILE_DIR).length > 0;
-  } catch {
-    return false;
-  }
+function hasState() {
+  return fs.existsSync(STATE_PATH);
 }
 
-// ログイン直後に呼び、Cookie を控える。
-async function saveCookies(context) {
-  fs.mkdirSync(AUTH_DIR, { recursive: true });
-  const { cookies } = await context.storageState();
-  fs.writeFileSync(COOKIE_PATH, JSON.stringify({ cookies }, null, 2));
-  return { path: COOKIE_PATH, count: cookies.length };
-}
-
-// maximized: 画面いっぱいに開く。画像認証など、下まで見えないと操作できないものがあるため。
-async function openBrowser({ headless = true, maximized = false, slowMo = 0 } = {}) {
-  fs.mkdirSync(PROFILE_DIR, { recursive: true });
-  const big = maximized && !headless;
-  const context = await chromium.launchPersistentContext(PROFILE_DIR, {
+// note.com のエディタは起動時に note.com の API を呼ぶが、ヘッドレスの Chromium は
+// User-Agent に HeadlessChrome を含むため拒否され、画面が組み上がらない。既定は画面あり。
+async function openBrowser({ headless = false } = {}) {
+  const browser = await chromium.launch({
     headless,
-    slowMo,
     executablePath: executablePath(),
-    args: big ? ['--start-maximized'] : [],
-    viewport: big ? null : { width: 1280, height: 900 },
+    args: headless ? [] : ['--start-maximized'],
+  });
+  const context = await browser.newContext({
+    storageState: hasState() ? STATE_PATH : undefined,
+    viewport: headless ? { width: 1280, height: 900 } : null,
     locale: 'ja-JP',
     timezoneId: 'Asia/Tokyo',
   });
-
-  // 控えておいた Cookie を戻す。プロファイルに残っていれば上書きされるだけで害はない。
-  try {
-    if (fs.existsSync(COOKIE_PATH)) {
-      const { cookies } = JSON.parse(fs.readFileSync(COOKIE_PATH, 'utf8'));
-      if (cookies && cookies.length) await context.addCookies(cookies);
-    }
-  } catch { /* 壊れていても続行する */ }
-
+  context.on('close', () => browser.close().catch(() => {}));
   return context;
 }
 
-// 開いているタブがあれば使い、無ければ新しく開く。
 async function firstPage(context) {
   return context.pages()[0] || context.newPage();
 }
 
-module.exports = { openBrowser, firstPage, hasProfile, saveCookies, PROFILE_DIR, COOKIE_PATH };
+module.exports = { openBrowser, firstPage, hasState, STATE_PATH };

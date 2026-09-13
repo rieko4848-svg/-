@@ -5,7 +5,7 @@
 //   node automation/note-inspect.js
 const path = require('path');
 const fs = require('fs');
-const { openBrowser, firstPage, hasProfile, PROFILE_DIR } = require('./lib/browser');
+const { openBrowser, firstPage, hasState, STATE_PATH } = require('./lib/browser');
 
 const SHOT_DIR = path.join(__dirname, 'out');
 const CANDIDATES = process.env.NOTE_INSPECT_URLS
@@ -121,10 +121,10 @@ async function collectButtonsIn(frame) {
 }
 
 async function main() {
-  if (!hasProfile()) throw new Error(`ログイン情報がありません。先に "npm run note:login" を実行してください (${PROFILE_DIR})`);
+  if (!hasState()) throw new Error(`ログイン記録がありません。先に "npm run note:login" を実行してください (${STATE_PATH})`);
   fs.mkdirSync(SHOT_DIR, { recursive: true });
 
-  const context = await openBrowser({ headless, maximized: !headless });
+  const context = await openBrowser({ headless });
   const page = await firstPage(context);
 
   // 画面が組み上がらない原因はたいてい JS のエラーか通信の失敗なので、記録しておく。
