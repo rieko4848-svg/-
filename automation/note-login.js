@@ -1,203 +1,59 @@
 #!/usr/bin/env node
-// note にログインし、Cookie を automation/.auth/note-state.json に保存する。
-// 通常は一度だけ実行すればよく、以降 note-post.js がこの状態を使い回す。
+// note にログインするためのブラウザを開く。
+// ログイン情報は automation/.auth/profile に残り続けるので、
+// 普通のブラウザと同じく、一度ログインすれば以降は不要。
 //
-//   node automation/note-login.js              # ブラウザが開くので手動でログイン
-//   NOTE_EMAIL=... NOTE_PASSWORD=... node automation/note-login.js --auto
-//
-// --auto は2段階認証やCAPTCHAが出ると止まるので、その場合は画面で手動操作を続ける。
-const path = require('path');
-const fs = require('fs');
-const { launch, newContext, saveState } = require('./lib/browser');
+//   node automation/note-login.js
+const { openBrowser, firstPage, saveCookies, PROFILE_DIR } = require('./lib/browser');
 const { ask, closePrompt } = require('./lib/prompt');
 
 const BASE = process.env.NOTE_BASE_URL || 'https://note.com';
-const LOGIN_URL = `${BASE}/login`;
-// ログイン必須のページ。ここが /login に飛ばされなければ本当にログインできている。
-const PROBE_URL = `${BASE}/notes/new`;
-const WAIT_LIMIT_MS = Number(process.env.NOTE_LOGIN_TIMEOUT_MS) || 10 * 60 * 1000;
-
-const manual = process.argv.includes('--manual');   // ブラウザ上で自分でログインしたいとき
-const headless = process.argv.includes('--headless');
-
-// 利用者が操作中のタブを邪魔しないよう、別タブで確認する。
-async function isLoggedIn(context) {
-  const probe = await context.newPage();
-  try {
-    await probe.goto(PROBE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await probe.waitForTimeout(1500);
-    return !probe.url().includes('/login');
-  } catch {
-    return false;
-  } finally {
-    await probe.close().catch(() => {});
-  }
-}
-
-const SHOT_DIR = path.join(__dirname, 'out');
-
-// 送信後の画面をそのまま記録する。推測せずに実物を見るため。
-async function captureState(page, name) {
-  fs.mkdirSync(SHOT_DIR, { recursive: true });
-  const shot = path.join(SHOT_DIR, `${name}.png`);
-  await page.screenshot({ path: shot, fullPage: false }).catch(() => {});
-
-  const text = await page.evaluate(() => {
-    const body = document.body ? document.body.innerText : '';
-    return body.replace(/\n{2,}/g, '\n').trim().slice(0, 600);
-  }).catch(() => '');
-
-  console.log(`\n--- 送信後の画面の内容 ---`);
-  console.log(text ? text.split('\n').map(l => '  ' + l).join('\n') : '  (文字を取得できませんでした)');
-  console.log(`--- ここまで ---`);
-  console.log(`画面の写真: ${shot}\n`);
-}
-
-// 画像認証は本人が通す必要がある。出ていることに気づけるようにする。
-async function captchaPresent(page) {
-  return page.evaluate(() => {
-    const text = document.body ? document.body.innerText : '';
-    if (/ロボットではありません|reCAPTCHA|hCaptcha|画像認証/i.test(text)) return true;
-    return !!document.querySelector(
-      'iframe[src*="recaptcha"], iframe[src*="hcaptcha"], iframe[title*="reCAPTCHA"], iframe[title*="captcha" i]'
-    );
-  }).catch(() => false);
-}
-
-// Google は自動操作ブラウザからのログインを拒否する。
-// 10分待たせず、その場で気づけるようにする。
-function externalAuthBlocked(currentUrl) {
-  return /accounts\.google\.com\/.*\b(rejected|deniedsigninrejected)\b/.test(currentUrl);
-}
-
-// 認証の途中（外部サービスの画面など）で確認を走らせないための足切り。
-function looksSettled(currentUrl) {
-  try {
-    const u = new URL(currentUrl);
-    if (u.host !== new URL(PROBE_URL).host) return false;   // 別ドメインで認証中
-    return !u.pathname.startsWith('/login') && !u.pathname.startsWith('/signup');
-  } catch {
-    return false;
-  }
-}
+const headless = process.argv.includes('--headless');   // 動作確認用
 
 async function main() {
-  // 画像認証などを操作できるよう、画面いっぱいに開く。
-  const browser = await launch({ headless, slowMo: 50, maximized: !headless });
-  const context = await newContext(browser, { useState: false, maximized: !headless });
-  const page = await context.newPage();
+  const context = await openBrowser({ headless, maximized: true, slowMo: 50 });
+  const page = await firstPage(context);
+  await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' });
 
-  await page.goto(LOGIN_URL, { waitUntil: 'domcontentloaded' });
+  console.log('');
+  console.log('========================================================');
+  console.log(' ブラウザが開きました。note にログインしてください。');
+  console.log('');
+  console.log('  ・メールアドレスとパスワードでログインしてください');
+  console.log('    （Google ログインは Google 側に拒否されます）');
+  console.log('  ・画像認証が出たら、そのまま画面で通してください');
+  console.log('  ・ログインできたら、このターミナルに戻って Enter を押してください');
+  console.log('');
+  console.log(' ※ 時間制限はありません。ゆっくりで大丈夫です。');
+  console.log('========================================================');
+  console.log('');
 
-  if (manual) {
-    console.log('ブラウザで note にログインしてください。');
-    console.log('※ Google ログインは Google 側に拒否されます。メールアドレスとパスワードをお使いください。');
-    console.log('ログインが完了したことを確認できるまで、最大10分待ちます…');
+  await ask('ログインが終わったら Enter を押してください… ', { required: false });
+  closePrompt();
+
+  const saved = await saveCookies(context).catch(() => null);
+
+  // 判定はおまけ。失敗しても情報は残るので、投稿を試せば分かる。
+  let state = '確認できませんでした';
+  try {
+    const probe = await context.newPage();
+    await probe.goto(`${BASE}/notes/new`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await probe.waitForTimeout(2000);
+    state = probe.url().includes('/login') ? 'まだログインできていないようです' : 'ログインできています';
+    await probe.close();
+  } catch { /* 確認できなくても続行する */ }
+
+  console.log(`\n確認結果: ${state}`);
+  console.log(`ログイン情報の保存先: ${PROFILE_DIR}`);
+  if (saved) console.log(`Cookie を ${saved.count} 件控えました: ${saved.path}`);
+  if (state === 'まだログインできていないようです') {
+    console.log('\nもう一度 "npm run note:login" を実行して、ログインし直してください。');
   } else {
-    // 既定はターミナルで入力してもらい、こちらが入力欄を埋める。
-    // ブラウザ上で操作してもらうと Google のボタンを押してしまいやすいため。
-    console.log('note のメールアドレスとパスワードを入力してください。');
-    console.log('（パスワードは伏せ字 * で表示されます。保存はされません）\n');
-    const email = process.env.NOTE_EMAIL || await ask('メールアドレス: ');
-    const password = process.env.NOTE_PASSWORD || await ask('パスワード: ', { hidden: true });
-    closePrompt();
-    if (!email || !password) throw new Error('メールアドレスとパスワードの両方が必要です');
-
-    console.log('\nログインしています…');
-    await page.fill('input[name="login"], input[type="email"], #email', email);
-    await page.fill('input[name="password"], input[type="password"], #password', password);
-    await page.click('button[type="submit"], button:has-text("ログイン")');
-    await page.waitForTimeout(3000);
-
-    await captureState(page, 'login-after-submit');
-
-    if (await captchaPresent(page)) {
-      console.log('■ 画像認証（「私はロボットではありません」など）が出ています。');
-      console.log('  開いているブラウザの窓で、ご自身で認証を完了してください。');
-      console.log('  窓は最大化して開いています。見えない場合は下へスクロールしてください。');
-      console.log('  認証が終わると自動で先に進みます。\n');
-    }
-
-    // 入力内容が違う場合、note は画面上にエラーを出す。気づけるよう拾っておく。
-    const problem = await page.evaluate(() => {
-      const hit = [...document.querySelectorAll('p, span, div')]
-        .map(el => (el.innerText || '').trim())
-        .find(t => t && t.length < 120 && /正しくありません|一致しません|失敗|エラー|お確かめ|見つかりません|登録されていません|認証/.test(t));
-      return hit || '';
-    }).catch(() => '');
-    if (problem) {
-      console.log(`  note からの表示: ${problem}`);
-      // 認証情報そのものが違う場合は、待っても解決しないので即座に終える。
-      // 2段階認証やCAPTCHAの案内は該当しないため、待機を続ける。
-      if (/正しくありません|一致しません|お確かめ|見つかりません|登録されていません/.test(problem)) {
-        throw new Error(
-          `note がログインを受け付けませんでした（「${problem}」）。\n` +
-          '  メールアドレスとパスワードをお確かめのうえ、もう一度実行してください。\n' +
-          '  パスワードが分からない場合は、普段お使いのブラウザで\n' +
-          '  https://note.com/login の「パスワードをお忘れですか」から再設定できます。'
-        );
-      }
-    }
+    console.log('\n次は下書き投稿を試せます:');
+    console.log('  npm run note:post -- automation/articles/example.md --headed');
   }
 
-  // URL が変わっただけでは信用しない。ログイン必須ページを開けるかで判定する。
-  const deadline = Date.now() + WAIT_LIMIT_MS;
-  let ok = false;
-  let notified = false;
-  // どこで止まっているか分かるよう、今どの画面にいるかを知らせ続ける。
-  let lastProbe = 0;
-  let lastShown = '';
-  let lastShownAt = 0;
-  const showWhere = () => {
-    const now = Date.now();
-    const url = page.url();
-    if (url === lastShown && now - lastShownAt < 30000) return;
-    lastShown = url;
-    lastShownAt = now;
-    const left = Math.ceil((deadline - now) / 60000);
-    console.log(`  [残り約${left}分] 今の画面: ${url.slice(0, 100)}`);
-  };
-
-  while (Date.now() < deadline) {
-    showWhere();
-    if (externalAuthBlocked(page.url())) {
-      throw new Error(
-        'Google が自動操作ブラウザからのログインを拒否しました（「ログインできませんでした」の画面）。\n' +
-        '  これは Google 側の仕様で、回避はできません。かわりに note の\n' +
-        '  メールアドレス＋パスワードでログインしてください。\n\n' +
-        '  パスワードを設定していない場合は、普段お使いのブラウザで\n' +
-        '  https://note.com/settings/account を開き、パスワードを設定してから\n' +
-        '  もう一度このコマンドを実行してください。'
-      );
-    }
-    // 画面が note 側に落ち着いたときに確認する。
-    // ただし、認証後も /login のまま留まる場合があるため、
-    // 落ち着いて見えなくても15秒ごとに一度は確認する。
-    const now = Date.now();
-    if (looksSettled(page.url()) || now - lastProbe > 15000) {
-      lastProbe = now;
-      if (!notified) { console.log('ログインを確認しています…'); notified = true; }
-      if (await isLoggedIn(context)) { ok = true; break; }
-      notified = false;   // まだだったので、次に戻ってきたら再度知らせる
-    }
-    await page.waitForTimeout(2000);
-  }
-
-  if (!ok) {
-    console.log(`\n時間切れです。最後にいた画面: ${page.url()}`);
-    throw new Error(
-      'ログインを確認できませんでした。\n' +
-      '  ・ログインが完了しないまま時間切れになった\n' +
-      '  ・2段階認証やCAPTCHAの途中で止まっていた\n' +
-      'などが考えられます。もう一度実行してみてください。'
-    );
-  }
-
-  const saved = await saveState(context);
-  console.log(`\nログインを確認しました。状態を保存しました: ${saved}`);
-  console.log('※ このファイルは認証情報そのものです。.gitignore 済みですが取り扱いに注意してください。');
-
-  await browser.close();
+  await context.close();
 }
 
-main().catch(err => { console.error('\nログインに失敗しました:', err.message); process.exit(1); });
+main().catch(err => { console.error('\n失敗しました:', err.message); process.exit(1); });

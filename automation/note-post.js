@@ -7,7 +7,7 @@
 //   node automation/note-post.js automation/articles/example.md --headed   # 動きを目で確認する
 const path = require('path');
 const fs = require('fs');
-const { launch, newContext, hasState, STATE_PATH } = require('./lib/browser');
+const { openBrowser, firstPage, hasProfile, PROFILE_DIR } = require('./lib/browser');
 const { parse } = require('./lib/article');
 
 // NOTE_NEW_POST_URL を設定すると投稿先を差し替えられる（動作確認用）。
@@ -75,16 +75,15 @@ async function openEditor(page) {
 
 async function main() {
   if (!file) throw new Error('使い方: node automation/note-post.js <記事.md> [--publish] [--headed]');
-  if (!hasState()) throw new Error(`ログイン状態がありません。先に "npm run note:login" を実行してください (${STATE_PATH})`);
+  if (!hasProfile()) throw new Error(`ログイン情報がありません。先に "npm run note:login" を実行してください (${PROFILE_DIR})`);
 
   const article = parse(path.resolve(file));
   console.log(`タイトル: ${article.title}`);
   console.log(`段落数: ${article.paragraphs.length} / タグ: ${article.tags.join(', ') || 'なし'}`);
   console.log(`モード: ${publish ? '公開' : '下書き保存'}`);
 
-  const browser = await launch({ headless, slowMo: headless ? 0 : 80 });
-  const context = await newContext(browser);
-  const page = await context.newPage();
+  const context = await openBrowser({ headless, maximized: !headless, slowMo: headless ? 0 : 80 });
+  const page = await firstPage(context);
 
   try {
     await openEditor(page);
@@ -144,7 +143,7 @@ async function main() {
     console.error(`デバッグ用スクリーンショット: ${await shot(page, 'error').catch(() => '(取得不可)')}`);
     process.exitCode = 1;
   } finally {
-    await browser.close();
+    await context.close();
   }
 }
 

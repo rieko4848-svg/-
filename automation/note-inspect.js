@@ -5,7 +5,7 @@
 //   node automation/note-inspect.js
 const path = require('path');
 const fs = require('fs');
-const { launch, newContext, hasState, STATE_PATH } = require('./lib/browser');
+const { openBrowser, firstPage, hasProfile, PROFILE_DIR } = require('./lib/browser');
 
 const SHOT_DIR = path.join(__dirname, 'out');
 const CANDIDATES = process.env.NOTE_INSPECT_URLS
@@ -73,12 +73,11 @@ async function collectButtons(page) {
 }
 
 async function main() {
-  if (!hasState()) throw new Error(`ログイン状態がありません。先に "npm run note:login" を実行してください (${STATE_PATH})`);
+  if (!hasProfile()) throw new Error(`ログイン情報がありません。先に "npm run note:login" を実行してください (${PROFILE_DIR})`);
   fs.mkdirSync(SHOT_DIR, { recursive: true });
 
-  const browser = await launch({ headless });
-  const context = await newContext(browser);
-  const page = await context.newPage();
+  const context = await openBrowser({ headless, maximized: !headless });
+  const page = await firstPage(context);
 
   for (const url of CANDIDATES) {
     console.log('\n============================================================');
@@ -122,7 +121,7 @@ async function main() {
 
   console.log('\n============================================================');
   console.log('ここまでの出力をそのままコピーして貼ってください。');
-  await browser.close();
+  await context.close();
 }
 
 main().catch(err => { console.error('調査に失敗しました:', err.message); process.exit(1); });
