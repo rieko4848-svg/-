@@ -54,6 +54,9 @@ node .claude/skills/note-draft/scripts/create_draft.cjs \
   見出しや太字などの装飾は、下書き保存後にnote.comの編集画面で人が仕上げる想定。
 
 成功すると下書きの編集URL(例: `https://note.com/notes/xxxxxxx/edit`)を標準出力に表示する。
+本文入力後は「下書き保存」ボタンを押し、**URLに note の ID が入るまで待って**成功と判定する。
+自動保存任せにすると保存前にブラウザを閉じてしまうため。確認できなかった場合は
+成功扱いにせず、デバッグ情報を保存したうえでエラーにする。
 ログインセッションが失効している場合は、その旨をエラーメッセージで知らせるので、
 `login_local.cjs` を再実行してもらう。
 
@@ -65,6 +68,16 @@ node .claude/skills/note-draft/scripts/create_draft.cjs \
 実行後のメッセージで分かる)。目印の文字列は `--paid-marker` で変更できる。
 
 **価格設定や実際の公開は行わない。** 有料/無料の値段はnote.com側の公開設定画面で人が決めること。
+
+## ブラウザは画面ありで動かすこと
+
+note.com のエディタは起動時に `note.com/api/v1/text_notes` を呼ぶが、ヘッドレスの
+Chromium は User-Agent に `HeadlessChrome` を含むため、この API 呼び出しが拒否される。
+結果として編集画面が組み上がらず、タイトル欄が見つからないというエラーになる
+(ブラウザのコンソールには `blocked by CORS policy` として現れる)。
+
+そのため `create_draft.cjs` は**画面ありが既定**。検証目的でヘッドレスにしたい場合のみ
+`HEADLESS=true` を明示する(その場合、上記の理由で失敗する可能性が高い)。
 
 ## 実装時の注意(note.comのUI変更への対策)
 

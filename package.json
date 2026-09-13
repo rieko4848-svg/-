@@ -5,5 +5,10 @@
   "dependencies": {
     "@netlify/blobs": "^8.0.0",
     "playwright": "^1.56.1"
+  },
+  "scripts": {
+    "note:login": "node .claude/skills/note-draft/scripts/login_local.cjs",
+    "note:draft": "node automation/note-draft-md.js",
+    "note:inspect": "node automation/note-inspect.js"
   }
 }

@@ -11,7 +11,7 @@ const { chromium } = require('playwright');
 
 const DEFAULT_STATE_PATH = path.join(os.homedir(), '.claude', 'note-auth', 'state.json');
 const STATE_PATH = process.env.NOTE_AUTH_STATE_PATH || DEFAULT_STATE_PATH;
-const NEW_NOTE_URL = 'https://note.com/notes/new';
+const NEW_NOTE_URL = process.env.NOTE_NEW_URL || 'https://note.com/notes/new';
 
 const TITLE_SELECTORS = [
   'textarea[placeholder*="タイトル"]',
@@ -30,6 +30,18 @@ const BODY_SELECTORS = [
 // part and a paid part. Placed by the note-writer skill (or the caller)
 // at the point where the paywall should go.
 const DEFAULT_PAID_MARKER = '<<<有料エリアここから>>>';
+
+// 下書き保存ボタンの候補。note.com は自動保存もするが、それ任せにすると
+// 保存される前にブラウザを閉じてしまうため、明示的に押しにいく。
+const SAVE_SELECTORS = [
+  'button:has-text("下書き保存")',
+  '[data-testid="draftSaveButton"]',
+  'button:has-text("保存")',
+];
+
+// 下書きが実際に作られると、URL に note の ID が入る(例: /notes/abc123/edit)。
+// これが出るまでは「保存された」と言い切れない。
+const DRAFT_URL_RE = /\/notes\/([A-Za-z0-9_-]+)\/edit/;
 
 // Candidates for note.com's block "+" insert control, tried on the empty
 // line where the paywall divider should be inserted.
@@ -118,6 +130,31 @@ async function saveDebugArtifacts(page) {
   console.error(`デバッグ情報を保存しました: ${dir}`);
 }
 
+async function clickSave(page) {
+  for (const sel of SAVE_SELECTORS) {
+    try {
+      const button = page.locator(sel).first();
+      await button.waitFor({ state: 'visible', timeout: 3000 });
+      await button.click();
+      return sel;
+    } catch {
+      // この候補は無かった。次を試す。
+    }
+  }
+  return null;
+}
+
+// 保存の証拠が出るまで待つ。出なければ null を返し、呼び出し側で正直に伝える。
+async function waitForSavedDraft(page, timeoutMs = 45000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const m = page.url().match(DRAFT_URL_RE);
+    if (m) return page.url();
+    await page.waitForTimeout(1000);
+  }
+  return null;
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
 
@@ -128,7 +165,16 @@ async function main() {
     );
   }
 
-  const browser = await chromium.launch({ headless: process.env.HEADLESS !== 'false' });
+  // note.com のエディタは起動時に note.com の API を呼ぶが、ヘッドレスの
+  // Chromium は User-Agent に HeadlessChrome を含むため API 側に拒否され、
+  // 画面が組み上がらない(CORS エラーとして現れ、タイトル欄が見つからない)。
+  // そのため既定は画面あり。HEADLESS=true を明示したときだけヘッドレスにする。
+  // Playwright 同梱版と別ビルドの Chromium しか無い環境向けの逃げ道。
+  const exe = process.env.PLAYWRIGHT_CHROMIUM_PATH;
+  const browser = await chromium.launch({
+    headless: process.env.HEADLESS === 'true',
+    executablePath: exe && fs.existsSync(exe) ? exe : undefined,
+  });
   const context = await browser.newContext({ storageState: STATE_PATH });
   const page = await context.newPage();
 
@@ -161,12 +207,27 @@ async function main() {
       await typeLines(page, args.paidBody);
     }
 
-    // note.com autosaves drafts periodically; give it time before reading the URL back.
-    await page.waitForTimeout(3000);
+    // 自動保存任せにせず、保存ボタンを押す。押せなくても自動保存の可能性は残る。
+    const savedBy = await clickSave(page);
+    if (!savedBy) console.log('下書き保存ボタンが見つからないため、自動保存を待ちます…');
+
+    const draftUrl = await waitForSavedDraft(page);
 
     await context.storageState({ path: STATE_PATH });
 
-    const draftUrl = page.url();
+    if (!draftUrl) {
+      // ここで「保存しました」と言ってしまうと、保存されていないのに
+      // 成功したと誤解させる。確認できなかったことをそのまま伝える。
+      await saveDebugArtifacts(page);
+      throw new Error(
+        '下書きが保存されたことを確認できませんでした。\n' +
+          `  最後の画面: ${page.url()}\n` +
+          '  note.com の下書き一覧 (https://note.com/notes) を確認してください。\n' +
+          '  入っていない場合は ./note-draft-debug/ の画面を見て、\n' +
+          '  create_draft.cjs の SAVE_SELECTORS を実際のボタンに合わせてください。'
+      );
+    }
+
     console.log('下書きを保存しました(公開はしていません):');
     console.log(draftUrl);
     if (paidDividerInserted === true) {
