@@ -7,6 +7,7 @@
 //
 // --auto は2段階認証やCAPTCHAが出ると止まるので、その場合は画面で手動操作を続ける。
 const { launch, newContext, saveState } = require('./lib/browser');
+const { ask, closePrompt } = require('./lib/prompt');
 
 const BASE = process.env.NOTE_BASE_URL || 'https://note.com';
 const LOGIN_URL = `${BASE}/login`;
@@ -14,7 +15,7 @@ const LOGIN_URL = `${BASE}/login`;
 const PROBE_URL = `${BASE}/notes/new`;
 const WAIT_LIMIT_MS = Number(process.env.NOTE_LOGIN_TIMEOUT_MS) || 10 * 60 * 1000;
 
-const auto = process.argv.includes('--auto');
+const manual = process.argv.includes('--manual');   // ブラウザ上で自分でログインしたいとき
 const headless = process.argv.includes('--headless');
 
 // 利用者が操作中のタブを邪魔しないよう、別タブで確認する。
@@ -55,17 +56,44 @@ async function main() {
 
   await page.goto(LOGIN_URL, { waitUntil: 'domcontentloaded' });
 
-  if (auto) {
-    const email = process.env.NOTE_EMAIL;
-    const password = process.env.NOTE_PASSWORD;
-    if (!email || !password) throw new Error('--auto には NOTE_EMAIL と NOTE_PASSWORD が必要です');
+  if (manual) {
+    console.log('ブラウザで note にログインしてください。');
+    console.log('※ Google ログインは Google 側に拒否されます。メールアドレスとパスワードをお使いください。');
+    console.log('ログインが完了したことを確認できるまで、最大10分待ちます…');
+  } else {
+    // 既定はターミナルで入力してもらい、こちらが入力欄を埋める。
+    // ブラウザ上で操作してもらうと Google のボタンを押してしまいやすいため。
+    const email = process.env.NOTE_EMAIL || await ask('note のメールアドレス: ');
+    const password = process.env.NOTE_PASSWORD || await ask('note のパスワード（入力しても表示されません）: ', { hidden: true });
+    closePrompt();
+    if (!email || !password) throw new Error('メールアドレスとパスワードの両方が必要です');
+
+    console.log('\nログインしています…');
     await page.fill('input[name="login"], input[type="email"], #email', email);
     await page.fill('input[name="password"], input[type="password"], #password', password);
     await page.click('button[type="submit"], button:has-text("ログイン")');
-  } else {
-    console.log('ブラウザで note にログインしてください。');
-    console.log('（メール・Google・Apple など、普段お使いの方法で構いません）');
-    console.log('ログインが完了したことを確認できるまで、最大10分待ちます…');
+    await page.waitForTimeout(3000);
+
+    // 入力内容が違う場合、note は画面上にエラーを出す。気づけるよう拾っておく。
+    const problem = await page.evaluate(() => {
+      const hit = [...document.querySelectorAll('p, span, div')]
+        .map(el => (el.innerText || '').trim())
+        .find(t => t && t.length < 120 && /正しくありません|一致しません|失敗|エラー|お確かめ/.test(t));
+      return hit || '';
+    }).catch(() => '');
+    if (problem) {
+      console.log(`  note からの表示: ${problem}`);
+      // 認証情報そのものが違う場合は、待っても解決しないので即座に終える。
+      // 2段階認証やCAPTCHAの案内は該当しないため、待機を続ける。
+      if (/正しくありません|一致しません|お確かめ/.test(problem)) {
+        throw new Error(
+          `note がログインを受け付けませんでした（「${problem}」）。\n` +
+          '  メールアドレスとパスワードをお確かめのうえ、もう一度実行してください。\n' +
+          '  パスワードが分からない場合は、普段お使いのブラウザで\n' +
+          '  https://note.com/login の「パスワードをお忘れですか」から再設定できます。'
+        );
+      }
+    }
   }
 
   // URL が変わっただけでは信用しない。ログイン必須ページを開けるかで判定する。

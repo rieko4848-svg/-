@@ -29,7 +29,11 @@ npx playwright install chromium   # ブラウザ本体の取得（初回のみ�
 npm run note:login
 ```
 
-ブラウザが開くので、画面上で note にログインしてください。
+ターミナルで note のメールアドレスとパスワードを聞かれます。パスワードは入力しても
+画面に表示されず、保存もされません（その場でブラウザの入力欄に入れるだけです）。
+
+ブラウザ上で自分でログインしたい場合は `--manual` を付けてください。
+
 
 ログインできたかどうかは、URL の変化ではなく**ログイン必須のページ (`/notes/new`) を
 開けるか**で判定します。確認が取れた場合だけ Cookie が
@@ -41,7 +45,7 @@ npm run note:login
 CAPTCHA が出た場合は画面で続きを操作してください）。
 
 ```bash
-NOTE_EMAIL=you@example.com NOTE_PASSWORD=**** npm run note:login -- --auto
+NOTE_EMAIL=you@example.com NOTE_PASSWORD=**** npm run note:login
 ```
 
 ### Google ログインは使えません
