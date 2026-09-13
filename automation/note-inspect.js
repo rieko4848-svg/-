@@ -35,8 +35,24 @@ async function collectFields(page) {
 
 async function collectFieldsIn(frame) {
   return frame.evaluate(() => {
+    // Shadow DOM（通常の検索では中が見えない作り）の中まで辿る。
+    const collectAll = (root, acc) => {
+      for (const el of root.querySelectorAll('*')) {
+        acc.push(el);
+        if (el.shadowRoot) collectAll(el.shadowRoot, acc);
+      }
+      return acc;
+    };
+    const every = collectAll(document, []);
+    const isField = (el) => {
+      const tag = el.tagName.toLowerCase();
+      return tag === 'textarea' || tag === 'input'
+        || el.getAttribute('contenteditable') === 'true'
+        || el.getAttribute('role') === 'textbox';
+    };
+
     const out = [];
-    const nodes = document.querySelectorAll('textarea, input, [contenteditable="true"], [role="textbox"]');
+    const nodes = every.filter(isField);
     for (const el of nodes) {
       const r = el.getBoundingClientRect();
       if (r.width < 2 || r.height < 2) continue;            // 画面に出ていないものは除く
@@ -81,8 +97,18 @@ async function collectButtons(page) {
 
 async function collectButtonsIn(frame) {
   return frame.evaluate(() => {
+    const collectAll = (root, acc) => {
+      for (const el of root.querySelectorAll('*')) {
+        acc.push(el);
+        if (el.shadowRoot) collectAll(el.shadowRoot, acc);
+      }
+      return acc;
+    };
+    const isButton = (el) => el.tagName.toLowerCase() === 'button'
+      || el.getAttribute('role') === 'button';
+
     const out = [];
-    for (const el of document.querySelectorAll('button, a[role="button"], [role="button"]')) {
+    for (const el of collectAll(document, []).filter(isButton)) {
       const r = el.getBoundingClientRect();
       if (r.width < 2 || r.height < 2) continue;
       const text = (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
@@ -140,6 +166,25 @@ async function main() {
       ].filter(Boolean).join(' ');
       console.log(`  [${i}] <${f.tag}> ${attrs}  (幅${f.w} 高${f.h} 上端${f.y})`);
     });
+
+    if (fields.length === 0) {
+      const hint = await page.evaluate(() => {
+        const tags = {};
+        for (const el of document.querySelectorAll('*')) {
+          const t = el.tagName.toLowerCase();
+          tags[t] = (tags[t] || 0) + 1;
+        }
+        const top = Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 12)
+          .map(([t, n]) => `${t}:${n}`).join(' ');
+        const shadows = [...document.querySelectorAll('*')].filter(el => el.shadowRoot).length;
+        return { top, shadows, total: document.querySelectorAll('*').length };
+      }).catch(() => null);
+      if (hint) {
+        console.log(`  ※ 0件だったので内訳を出します`);
+        console.log(`     要素の総数: ${hint.total} / Shadow DOM: ${hint.shadows}個`);
+        console.log(`     多い要素: ${hint.top}`);
+      }
+    }
 
     const buttons = await collectButtons(page);
     console.log(`\n  --- ボタン (${buttons.length}件) ---`);
