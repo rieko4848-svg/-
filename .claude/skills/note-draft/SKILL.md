@@ -9,32 +9,41 @@ note.com にはユーザー向けの投稿APIが無いため、実際のブラ�
 新規記事の編集画面にタイトルと本文を入力し、下書き保存するところまでを自動化する。
 **公開ボタンは絶対に押さない。** 下書き保存までがこのスキルの範囲。
 
+このスキルは**自分のパソコン上のClaude Code**で使うことを前提にしている
+(ログイン操作に画面が必要なため。クラウド上のセッションでは動かせない)。
+
 タイトルだけがあって本文がまだ無い(対話しながら記事を書きたい)場合は、
 先に `note-writer` スキルを使うこと。このスキルは「すでに確定したタイトルと本文」を
 note.comに流し込む最後のステップを担当する。
 
-## 前提: ログインセッション(Cookie)の準備
+## 初回だけの準備
 
-このスキルはユーザーのIDとパスワードを直接扱わない。事前に取得した note.com のログイン
-セッション(Playwright の `storageState` 形式)をファイルから読み込んで使う。
+### 1. 必要なものをインストール(1回だけ)
 
-保存先はデフォルトで **リポジトリの外** (`~/.claude/note-auth/state.json`)。
-`NOTE_AUTH_STATE_PATH` 環境変数で上書き可能。**このファイルは絶対にコミットしない。**
+リポジトリのルートで:
 
-セッションファイルがまだ無い場合、ユーザーに以下のどちらかを案内する:
+```bash
+npm install
+npx playwright install chromium
+```
 
-1. **推奨**: 画面表示ができる自分のPC(ローカル)で `scripts/login_local.cjs` を実行してもらう。
-   ブラウザが開くので note.com に手動でログインしてもらい、閉じると
-   `~/.claude/note-auth/state.json` にセッションが保存される。
-   (このリモート実行環境には画面がないため、ログイン操作自体はローカルでしか行えない)
-2. 既にブラウザの拡張機能等でCookieをエクスポート済みなら、Playwright の
-   `storageState` JSON形式 (`{ "cookies": [...], "origins": [...] }`) に整形して
-   同じパスに置いてもらう。
+### 2. note.comにログインした記録を保存する(1回だけ)
+
+```bash
+node .claude/skills/note-draft/scripts/login_local.cjs
+```
+
+ブラウザが自動で開くので、note.comにいつも通りログインする。ログインできたら
+ターミナルに戻ってEnterキーを押す。これで `~/.claude/note-auth/state.json` に
+ログイン記録(Cookie)が保存される。**パスワードそのものはこのプログラムに渡さない。**
+
+このファイルはパスワード同然に扱われるべき情報なので、Gitには絶対にコミットされない
+設定(`.gitignore`)になっている。ログインが失効したら、この手順をもう一度行えばよい。
 
 ## 下書きを作成する
 
 ```bash
-NODE_PATH=/opt/node22/lib/node_modules node .claude/skills/note-draft/scripts/create_draft.cjs \
+node .claude/skills/note-draft/scripts/create_draft.cjs \
   --title "記事タイトル" \
   --body-file /path/to/body.txt
 ```
@@ -44,6 +53,10 @@ NODE_PATH=/opt/node22/lib/node_modules node .claude/skills/note-draft/scripts/cr
 - 本文はプレーンテキストとして1行ずつ入力される(note.com側のリッチテキスト変換には依存しない)。
   見出しや太字などの装飾は、下書き保存後にnote.comの編集画面で人が仕上げる想定。
 
+成功すると下書きの編集URL(例: `https://note.com/notes/xxxxxxx/edit`)を標準出力に表示する。
+ログインセッションが失効している場合は、その旨をエラーメッセージで知らせるので、
+`login_local.cjs` を再実行してもらう。
+
 ### 有料note(無料部分+有料部分)にしたい場合
 
 本文の中に、単独行で `<<<有料エリアここから>>>` という目印を入れておくと、そこを境目として
@@ -52,13 +65,6 @@ NODE_PATH=/opt/node22/lib/node_modules node .claude/skills/note-draft/scripts/cr
 実行後のメッセージで分かる)。目印の文字列は `--paid-marker` で変更できる。
 
 **価格設定や実際の公開は行わない。** 有料/無料の値段はnote.com側の公開設定画面で人が決めること。
-- 実行環境にヘッドレスブラウザ用の環境変数 (`PLAYWRIGHT_BROWSERS_PATH`) が既に設定されている
-  前提。ローカル実行時に `Executable doesn't exist` エラーが出たら `npx playwright install chromium`
-  を一度実行する。
-
-成功すると下書きの編集URL(例: `https://note.com/notes/xxxxxxx/edit`)を標準出力に表示する。
-ログインセッションが失効している場合は、その旨をエラーメッセージで知らせるので、
-`login_local.cjs` を再実行してもらう。
 
 ## 実装時の注意(note.comのUI変更への対策)
 
