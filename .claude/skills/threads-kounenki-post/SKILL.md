@@ -1,6 +1,6 @@
 ---
 name: threads-kounenki-post
-description: Write Threads (スレッズ) posts for the 更年期 account @rie_kounenki_now (57歳・フルタイム会社員・更年期まっただ中の当事者、耳つぼダイエット一般資格あり) using seven post templates distilled from researching successful 更年期 accounts — リスト型, 心の声チェック型, まとめ型(楽天リンク付き), 正直レビュー型, 共感ひとこと型, 知識型(耳つぼ・栄養・サプリ、リンクなし), 体重記録型. Picks the template, asks only what is missing, then outputs copy-ready posts with safe wording (no 効果の断定) and #PR on link posts. Use when the user asks for a 更年期 post, a post for rie_kounenki_now, or "投稿の型で作って".
+description: Write Threads (スレッズ) posts for the 更年期 account @rie_kounenki_now (57歳・フルタイム会社員・更年期まっただ中の当事者、耳つぼダイエット一般資格あり) using eight post templates distilled from researching successful 更年期 accounts — リスト型, 心の声チェック型, まとめ型(楽天リンク付き), 正直レビュー型, 共感ひとこと型, 知識型(耳つぼ・栄養・サプリ、リンクなし), 体重記録型, 楽天トラベル型(ほっと時間の宿紹介). Picks the template, asks only what is missing, then outputs copy-ready posts with safe wording (no 効果の断定) and #PR on link posts. Use when the user asks for a 更年期 post, a post for rie_kounenki_now, or "投稿の型で作って".
 ---
 
 # 更年期アカウントの投稿を、型で作る
@@ -23,7 +23,7 @@ description: Write Threads (スレッズ) posts for the 更年期 account @rie_k
 - 収益: 楽天アフィリエイトでゼロイチを狙う(Amazonアソシエイトは後から)
 - AIの発信は別アカウント `@rie_4848` の担当。こちらには入れない
 
-## 7つの型
+## 8つの型
 
 ### ① リスト型(フォロワー集め向け・リンクなし)
 参考: いいね321の「40を過ぎたからって〇〇しません。理由は〜」
@@ -83,6 +83,20 @@ description: Write Threads (スレッズ) posts for the 更年期 account @rie_k
 - 体重の数字を出すかどうかは本人に確認する。出す場合も「〇kg減った」を成果として強調しない
 - 最後は「同じように向き合っている人、一緒にゆるく続けよう」など、読む人を仲間に誘って締める
 
+### ⑧ 楽天トラベル型(収益向け・リンクあり)
+参考: 由美 @yumi202376(楽天トラベルで成果が出ているアカウント。詳しくは `funnel.md`)
+- テーマは**ほっと時間・自分へのごほうび**: 「がんばった自分へのひとり温泉」「更年期の疲れをリセットしたい週末」
+  「母と娘のゆっくり旅」など、更年期アカウントの流れから外れない宿を選ぶ
+- 親投稿: 心の声や本人の疲れから入る(例: 「仕事も更年期もがんばってる自分に、そろそろごほうびがほしい」)→
+  「行ってみたい宿を見つけた／ずっと気になってる宿がある」→「リプ欄に書きます」。宿の名前・リンクは出さない
+- リプ①: 宿の名前と、惹かれた点を2〜3個(部屋の露天風呂、ひとり旅プラン、食事が部屋で取れる など。
+  楽天トラベルの宿のページに書いてあることだけ)
+- リプ②: 気になる点も1つ(アクセス、時期によって混む など)
+- リプ③: 楽天トラベルのアフィリエイトリンク＋ `#PR`
+- 行ったことがない宿は「行ってみたい」「気になっている」で書く。泊まった感想を作らない
+- 温泉の効能(「ほてりに効く」「疲れが取れる」など)は書かない。「ゆっくりできそう」「ほっとできそう」の気持ちで書く
+- 値段・空室・セール・クーポンは変わるので書かない
+
 ## 集客導線(先の話)
 
 スレッズ → プロフィールの無料プレゼント → LP → メール／LINE登録 → ステップ配信、という導線の実例と注意点は
@@ -92,10 +106,10 @@ description: Write Threads (スレッズ) posts for the 更年期 account @rie_k
 
 - **1日2投稿(朝7〜8時・夜20〜21時)**。本人は週末にまとめて予約投稿している
   - 朝: ②心の声チェック型・⑤共感ひとこと型など、さっと読めるもの
-  - 夜: ①リスト型・⑥知識型など、じっくり読めるもの。リンク投稿(③④)も夜に
+  - 夜: ①リスト型・⑥知識型など、じっくり読めるもの。リンク投稿(③④⑧)も夜に
 - 始めの1〜2週間: ①②⑤⑥⑦のリンクなし投稿を中心にする
 - ⑦の体重記録は週1回など、決まったペースで続ける
-- フォロワーが増えてきたら: リンクなし7〜8割、③④のリンク投稿2〜3割
+- フォロワーが増えてきたら: リンクなし7〜8割、③④⑧のリンク投稿2〜3割
 - 毎回、投稿画面の「トピックを追加」で `更年期` をつけるよう伝える
 
 ## 手順
